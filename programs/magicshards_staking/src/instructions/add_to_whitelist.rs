@@ -19,16 +19,16 @@ pub struct AddToWhitelist<'info> {
 
     #[account(
         init,
-        space = 8 + CollectionData::LEN,
+        space = 8 + WhitelistProof::LEN,
         payer = authority,
         seeds = [
-            CollectionData::PREFIX,
+            WhitelistProof::PREFIX,
             farm.key().as_ref(),
             creator.key().as_ref(),
         ],
         bump,
     )]
-    pub collection_data: Account<'info, CollectionData>,
+    pub whitelist_proof: Account<'info, WhitelistProof>,
 
     /// CHECK: Collection creator address.
     pub creator: UncheckedAccount<'info>,
@@ -44,7 +44,7 @@ pub fn handler(
     // tokens/sec
     reward_rate: u64,
 ) -> Result<()> {
-    *ctx.accounts.collection_data = CollectionData {
+    *ctx.accounts.whitelist_proof = WhitelistProof {
         reward_rate,
         farm: ctx.accounts.farm.key(),
         creator: ctx.accounts.creator.key(),

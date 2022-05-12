@@ -10,7 +10,7 @@ pub mod utils;
 use instructions::*;
 
 #[program]
-pub mod nftabs_staking {
+pub mod magicshards_staking {
     use super::*;
 
     pub fn create_farm(ctx: Context<CreateFarm>) -> Result<()> {

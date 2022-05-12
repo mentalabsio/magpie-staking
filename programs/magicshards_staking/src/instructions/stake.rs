@@ -26,15 +26,15 @@ pub struct Stake<'info> {
     pub farmer: Account<'info, Farmer>,
 
     #[account(
-        constraint = metadata_creator(&*gem_metadata)?.eq(&collection_data.creator),
+        constraint = metadata_creator(&*gem_metadata)?.eq(&whitelist_proof.creator),
         seeds = [
-            CollectionData::PREFIX,
+            WhitelistProof::PREFIX,
             farm.key().as_ref(),
             metadata_creator(&*gem_metadata)?.as_ref(),
         ],
         bump,
     )]
-    pub collection_data: Account<'info, CollectionData>,
+    pub whitelist_proof: Account<'info, WhitelistProof>,
 
     pub gem_mint: Account<'info, Mint>,
 
@@ -137,7 +137,7 @@ pub fn handler(ctx: Context<Stake>, amount: u64) -> Result<()> {
 
     let farm = &mut ctx.accounts.farm;
     let factor = ctx.accounts.lock.bonus_factor;
-    let base_rate = amount * ctx.accounts.collection_data.reward_rate;
+    let base_rate = amount * ctx.accounts.whitelist_proof.reward_rate;
     let reward_rate = calculate_reward_rate(base_rate, factor as u64)?;
 
     let reserved_amount = reward_rate as u64 * ctx.accounts.lock.duration;

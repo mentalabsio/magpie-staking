@@ -10,7 +10,7 @@ import { expect } from "chai";
 
 import { StakingProgram } from "../app/lib";
 import {
-  CollectionData,
+  WhitelistProof,
   Farm,
   Farmer,
   StakeReceipt,
@@ -23,7 +23,7 @@ import {
 } from "../app/lib/pda";
 import { findFarmLocks } from "../app/lib/utils";
 
-describe("nftabs-staking", () => {
+describe("staking-program", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
@@ -123,21 +123,21 @@ describe("nftabs-staking", () => {
       rewardMint,
     });
 
-    const { collectionData } = await stakingClient.addToWhitelist({
+    const { whitelistProof } = await stakingClient.addToWhitelist({
       creator: creatorAddress,
       authority: farmAuthority,
       farm,
       rewardRate: { tokenAmount: new BN(100), intervalInSeconds: new BN(1) },
     });
 
-    const collectionDataAccount = await CollectionData.fetch(
+    const whitelistProofAccount = await WhitelistProof.fetch(
       connection,
-      collectionData
+      whitelistProof
     );
 
-    expect(collectionDataAccount.farm).to.eql(farm);
-    expect(collectionDataAccount.creator).to.eql(creatorAddress);
-    expect(collectionDataAccount.rewardRate.toNumber()).to.equal(100);
+    expect(whitelistProofAccount.farm).to.eql(farm);
+    expect(whitelistProofAccount.creator).to.eql(creatorAddress);
+    expect(whitelistProofAccount.rewardRate.toNumber()).to.equal(100);
   });
 
   it("should be able to initialize a farmer", async () => {

@@ -1,12 +1,12 @@
 [package]
-name = "nftabs-staking"
+name = "magicshards-staking"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "nftabs_staking"
+name = "magicshards_staking"
 
 [features]
 no-entrypoint = []

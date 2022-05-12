@@ -40,7 +40,7 @@ export const findFarmManagerAddress = ({
     PROGRAM_ID
   )[0];
 
-export const findCollectionDataAddress = ({
+export const findWhitelistProofAddress = ({
   farm,
   creator,
 }: {

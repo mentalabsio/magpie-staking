@@ -25,7 +25,7 @@ import {
 } from "./gen/instructions";
 import { LockConfigFields } from "./gen/types";
 import {
-  findCollectionDataAddress,
+  findWhitelistProofAddress,
   findFarmAddress,
   findFarmerAddress,
   findFarmManagerAddress,
@@ -251,7 +251,7 @@ export const StakingProgram = (connection: Connection) => {
       farm,
       authority: authority.publicKey,
     });
-    const collectionData = findCollectionDataAddress({ creator, farm });
+    const whitelistProof = findWhitelistProofAddress({ creator, farm });
 
     const { tokenAmount, intervalInSeconds } = rewardRate;
 
@@ -262,7 +262,7 @@ export const StakingProgram = (connection: Connection) => {
         creator,
         farmManager,
         authority: authority.publicKey,
-        collectionData,
+        whitelistProof,
         systemProgram,
       }
     );
@@ -271,7 +271,7 @@ export const StakingProgram = (connection: Connection) => {
 
     const txSig = await sendAndConfirmTransaction(connection, tx, [authority]);
 
-    return { tx: txSig, collectionData };
+    return { tx: txSig, whitelistProof: whitelistProof };
   };
 
   const _initializeFarmer = async ({ farm, owner }: IInitializeFarmer) => {
@@ -303,7 +303,7 @@ export const StakingProgram = (connection: Connection) => {
       metadata.data.data.creators.find((c) => c.verified).address
     );
 
-    const collectionData = findCollectionDataAddress({
+    const whitelistProof = findWhitelistProofAddress({
       farm,
       creator: metadataCreator,
     });
@@ -326,7 +326,7 @@ export const StakingProgram = (connection: Connection) => {
 
       gemMint: mint,
       gemMetadata: metadata.pubkey,
-      collectionData,
+      whitelistProof,
       farmerVault,
       gemOwnerAta,
 
@@ -395,7 +395,7 @@ export const StakingProgram = (connection: Connection) => {
       metadata.data.data.creators.find((c) => c.verified).address
     );
 
-    const collectionData = findCollectionDataAddress({
+    const whitelistProof = findWhitelistProofAddress({
       farm,
       creator: metadataCreator,
     });
@@ -421,7 +421,7 @@ export const StakingProgram = (connection: Connection) => {
         farmer,
         gemMint: mint,
         gemMetadata: metadata.pubkey,
-        collectionData,
+        whitelistProof,
         stakeReceipt,
         lock,
         farmerVault,

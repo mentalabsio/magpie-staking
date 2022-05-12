@@ -40,15 +40,15 @@ pub struct Unstake<'info> {
     pub gem_metadata: Box<Account<'info, MetadataAccount>>,
 
     #[account(
-        constraint = metadata_creator(&*gem_metadata)?.eq(&collection_data.creator),
+        constraint = metadata_creator(&*gem_metadata)?.eq(&whitelist_proof.creator),
         seeds = [
-            CollectionData::PREFIX,
+            WhitelistProof::PREFIX,
             farm.key().as_ref(),
             metadata_creator(&*gem_metadata)?.as_ref(),
         ],
         bump,
     )]
-    pub collection_data: Account<'info, CollectionData>,
+    pub whitelist_proof: Account<'info, WhitelistProof>,
 
     #[account(
         mut,
@@ -110,7 +110,7 @@ pub fn handler(ctx: Context<Unstake>, amount: u64) -> Result<()> {
     ctx.accounts.release_gems()?;
 
     let bonus_factor = ctx.accounts.lock.bonus_factor;
-    let reward_rate = amount * ctx.accounts.collection_data.reward_rate;
+    let reward_rate = amount * ctx.accounts.whitelist_proof.reward_rate;
     let reward_rate = calculate_reward_rate(reward_rate, bonus_factor as u64)?;
 
     ctx.accounts.farmer.decrease_reward_rate(reward_rate)?;

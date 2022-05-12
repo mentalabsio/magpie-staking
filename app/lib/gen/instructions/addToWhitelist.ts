@@ -11,7 +11,7 @@ export interface AddToWhitelistArgs {
 export interface AddToWhitelistAccounts {
   farm: PublicKey
   farmManager: PublicKey
-  collectionData: PublicKey
+  whitelistProof: PublicKey
   creator: PublicKey
   authority: PublicKey
   systemProgram: PublicKey
@@ -26,7 +26,7 @@ export function addToWhitelist(
   const keys = [
     { pubkey: accounts.farm, isSigner: false, isWritable: false },
     { pubkey: accounts.farmManager, isSigner: false, isWritable: false },
-    { pubkey: accounts.collectionData, isSigner: false, isWritable: true },
+    { pubkey: accounts.whitelistProof, isSigner: false, isWritable: true },
     { pubkey: accounts.creator, isSigner: false, isWritable: false },
     { pubkey: accounts.authority, isSigner: true, isWritable: true },
     { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },

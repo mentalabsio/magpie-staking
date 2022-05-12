@@ -2,7 +2,7 @@
 seeds = false
 
 [programs.localnet]
-nftabs_staking = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+magicshards_staking = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 
 [registry]
 url = "https://anchor.projectserum.com"
@@ -13,7 +13,7 @@ wallet = "~/.config/solana/anchor.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
-gen = "anchor-client-gen target/idl/nftabs_staking.json app/lib/gen"
+gen = "anchor-client-gen target/idl/magicshards_staking.json app/lib/gen"
 
 [test.validator]
 url = "https://api.devnet.solana.com"

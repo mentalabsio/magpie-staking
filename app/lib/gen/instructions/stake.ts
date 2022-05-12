@@ -11,7 +11,7 @@ export interface StakeArgs {
 export interface StakeAccounts {
   farm: PublicKey
   farmer: PublicKey
-  collectionData: PublicKey
+  whitelistProof: PublicKey
   gemMint: PublicKey
   gemMetadata: PublicKey
   farmerVault: PublicKey
@@ -31,7 +31,7 @@ export function stake(args: StakeArgs, accounts: StakeAccounts) {
   const keys = [
     { pubkey: accounts.farm, isSigner: false, isWritable: true },
     { pubkey: accounts.farmer, isSigner: false, isWritable: true },
-    { pubkey: accounts.collectionData, isSigner: false, isWritable: false },
+    { pubkey: accounts.whitelistProof, isSigner: false, isWritable: false },
     { pubkey: accounts.gemMint, isSigner: false, isWritable: false },
     { pubkey: accounts.gemMetadata, isSigner: false, isWritable: false },
     { pubkey: accounts.farmerVault, isSigner: false, isWritable: true },
