@@ -13,3 +13,39 @@ wallet = "~/.config/solana/anchor.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+gen = "anchor-client-gen target/idl/nftabs_staking.json app/lib/gen"
+
+[test.validator]
+url = "https://api.devnet.solana.com"
+
+[test]
+startup_wait = 20000
+
+### ACCOUNTS
+
+# User address
+[[test.validator.clone]]
+address = "7CY9dKWDQimK43RkGXyT7BUpgvUGduSbCRt4RNpv2L8w"
+
+# NFT
+[[test.validator.clone]]
+address = "SaCd2fYycnD2wcUJWZNfF2xGAVvcUaVeTnEz7MUibm5"
+# User NFT ATA
+[[test.validator.clone]]
+address = "CnKACXHgGjsmm2EXMbyLbJ6YJigYtuxHCZg6KGRZKpz8"
+# NFT metadata
+[[test.validator.clone]]
+address = "5pZpkrsRVpX5frmnebSacLngp1toBzz8aGbGbwiKuxm8"
+
+### PROGRAMS
+
+# Token program
+[[test.validator.clone]]
+address = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+# Associated token program
+[[test.validator.clone]]
+address = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+# Token metadata program
+[[test.validator.clone]]
+address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+
