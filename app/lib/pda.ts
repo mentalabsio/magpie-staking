@@ -42,13 +42,13 @@ export const findFarmManagerAddress = ({
 
 export const findWhitelistProofAddress = ({
   farm,
-  creator,
+  creatorOrMint,
 }: {
   farm: PublicKey;
-  creator: PublicKey;
+  creatorOrMint: PublicKey;
 }): PublicKey =>
   utils.publicKey.findProgramAddressSync(
-    [Buffer.from("collection_data"), farm.toBuffer(), creator.toBuffer()],
+    [Buffer.from("collection_data"), farm.toBuffer(), creatorOrMint.toBuffer()],
     PROGRAM_ID
   )[0];
 

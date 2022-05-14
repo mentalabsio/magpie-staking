@@ -3,7 +3,6 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     token::{Mint, Token, TokenAccount},
 };
-use solutils::wrappers::metadata::{MetadataAccount, TokenMetadata};
 
 use crate::{error::*, state::*, utils::*};
 
@@ -25,29 +24,9 @@ pub struct Stake<'info> {
     )]
     pub farmer: Account<'info, Farmer>,
 
-    #[account(
-        constraint = metadata_creator(&*gem_metadata)?.eq(&whitelist_proof.creator),
-        seeds = [
-            WhitelistProof::PREFIX,
-            farm.key().as_ref(),
-            metadata_creator(&*gem_metadata)?.as_ref(),
-        ],
-        bump,
-    )]
-    pub whitelist_proof: Account<'info, WhitelistProof>,
-
     pub gem_mint: Account<'info, Mint>,
 
-    #[account(
-        seeds = [
-          b"metadata".as_ref(),
-          TokenMetadata::id().as_ref(),
-          gem_mint.key().as_ref(),
-        ],
-        seeds::program = TokenMetadata::id(),
-        bump,
-    )]
-    pub gem_metadata: Box<Account<'info, MetadataAccount>>,
+    pub whitelist_proof: Account<'info, WhitelistProof>,
 
     #[account(
         init_if_needed,
@@ -102,7 +81,25 @@ impl Stake<'_> {
     }
 }
 
-pub fn handler(ctx: Context<Stake>, amount: u64) -> Result<()> {
+pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, Stake<'info>>, amount: u64) -> Result<()> {
+    if amount == 0 {
+        return Ok(());
+    }
+
+    let mut amount = amount;
+
+    let whitelist_proof = &ctx.accounts.whitelist_proof;
+    WhitelistProof::validate(
+        whitelist_proof,
+        &ctx.accounts.gem_mint,
+        ctx.program_id,
+        ctx.remaining_accounts,
+    )?;
+
+    if let WhitelistType::Creator = whitelist_proof.ty {
+        amount = 1;
+    }
+
     // Lock the nft to the farmer account.
     ctx.accounts.lock_gem(amount)?;
 

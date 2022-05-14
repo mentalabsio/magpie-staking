@@ -12,7 +12,6 @@ export interface UnstakeAccounts {
   farm: PublicKey
   farmer: PublicKey
   gemMint: PublicKey
-  gemMetadata: PublicKey
   whitelistProof: PublicKey
   stakeReceipt: PublicKey
   lock: PublicKey
@@ -29,7 +28,6 @@ export function unstake(args: UnstakeArgs, accounts: UnstakeAccounts) {
     { pubkey: accounts.farm, isSigner: false, isWritable: true },
     { pubkey: accounts.farmer, isSigner: false, isWritable: true },
     { pubkey: accounts.gemMint, isSigner: false, isWritable: false },
-    { pubkey: accounts.gemMetadata, isSigner: false, isWritable: false },
     { pubkey: accounts.whitelistProof, isSigner: false, isWritable: false },
     { pubkey: accounts.stakeReceipt, isSigner: false, isWritable: true },
     { pubkey: accounts.lock, isSigner: false, isWritable: false },

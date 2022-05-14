@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token::Mint;
 
 use crate::state::*;
 
@@ -24,14 +25,14 @@ pub struct AddToWhitelist<'info> {
         seeds = [
             WhitelistProof::PREFIX,
             farm.key().as_ref(),
-            creator.key().as_ref(),
+            creator_or_mint.key().as_ref(),
         ],
         bump,
     )]
     pub whitelist_proof: Account<'info, WhitelistProof>,
 
-    /// CHECK: Collection creator address.
-    pub creator: UncheckedAccount<'info>,
+    /// CHECK: Collection creator or mint address.
+    pub creator_or_mint: UncheckedAccount<'info>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -41,13 +42,19 @@ pub struct AddToWhitelist<'info> {
 
 pub fn handler(
     ctx: Context<AddToWhitelist>,
-    // tokens/sec
     reward_rate: u64,
+    whitelist_type: WhitelistType,
 ) -> Result<()> {
+    if let WhitelistType::Mint = whitelist_type {
+        let data = ctx.accounts.creator_or_mint.try_borrow_mut_data()?;
+        Mint::try_deserialize(&mut &**data)?;
+    }
+
     *ctx.accounts.whitelist_proof = WhitelistProof {
         reward_rate,
+        ty: whitelist_type,
         farm: ctx.accounts.farm.key(),
-        creator: ctx.accounts.creator.key(),
+        whitelisted_address: ctx.accounts.creator_or_mint.key(),
     };
 
     Ok(())

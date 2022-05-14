@@ -1,8 +1,3 @@
-export {
-  WhitelistProof,
-  WhitelistProofFields,
-  WhitelistProofJSON,
-} from "./WhitelistProof"
 export { FarmManager, FarmManagerFields, FarmManagerJSON } from "./FarmManager"
 export { Farmer, FarmerFields, FarmerJSON } from "./Farmer"
 export { Farm, FarmFields, FarmJSON } from "./Farm"
@@ -12,3 +7,8 @@ export {
   StakeReceiptFields,
   StakeReceiptJSON,
 } from "./StakeReceipt"
+export {
+  WhitelistProof,
+  WhitelistProofFields,
+  WhitelistProofJSON,
+} from "./WhitelistProof"

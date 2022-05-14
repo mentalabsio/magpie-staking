@@ -5,36 +5,41 @@ import * as types from "../types" // eslint-disable-line @typescript-eslint/no-u
 import { PROGRAM_ID } from "../programId"
 
 export interface WhitelistProofFields {
-  creator: PublicKey
+  whitelistedAddress: PublicKey
   farm: PublicKey
   rewardRate: BN
+  ty: types.WhitelistTypeKind
 }
 
 export interface WhitelistProofJSON {
-  creator: string
+  whitelistedAddress: string
   farm: string
   rewardRate: string
+  ty: types.WhitelistTypeJSON
 }
 
 export class WhitelistProof {
-  readonly creator: PublicKey
+  readonly whitelistedAddress: PublicKey
   readonly farm: PublicKey
   readonly rewardRate: BN
+  readonly ty: types.WhitelistTypeKind
 
   static readonly discriminator = Buffer.from([
     194, 230, 60, 10, 60, 98, 236, 39,
   ])
 
   static readonly layout = borsh.struct([
-    borsh.publicKey("creator"),
+    borsh.publicKey("whitelistedAddress"),
     borsh.publicKey("farm"),
     borsh.u64("rewardRate"),
+    types.WhitelistType.layout("ty"),
   ])
 
   constructor(fields: WhitelistProofFields) {
-    this.creator = fields.creator
+    this.whitelistedAddress = fields.whitelistedAddress
     this.farm = fields.farm
     this.rewardRate = fields.rewardRate
+    this.ty = fields.ty
   }
 
   static async fetch(
@@ -79,25 +84,28 @@ export class WhitelistProof {
     const dec = WhitelistProof.layout.decode(data.slice(8))
 
     return new WhitelistProof({
-      creator: dec.creator,
+      whitelistedAddress: dec.whitelistedAddress,
       farm: dec.farm,
       rewardRate: dec.rewardRate,
+      ty: types.WhitelistType.fromDecoded(dec.ty),
     })
   }
 
   toJSON(): WhitelistProofJSON {
     return {
-      creator: this.creator.toString(),
+      whitelistedAddress: this.whitelistedAddress.toString(),
       farm: this.farm.toString(),
       rewardRate: this.rewardRate.toString(),
+      ty: this.ty.toJSON(),
     }
   }
 
   static fromJSON(obj: WhitelistProofJSON): WhitelistProof {
     return new WhitelistProof({
-      creator: new PublicKey(obj.creator),
+      whitelistedAddress: new PublicKey(obj.whitelistedAddress),
       farm: new PublicKey(obj.farm),
       rewardRate: new BN(obj.rewardRate),
+      ty: types.WhitelistType.fromJSON(obj.ty),
     })
   }
 }

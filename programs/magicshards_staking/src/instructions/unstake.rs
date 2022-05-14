@@ -1,9 +1,8 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
-use solutils::wrappers::metadata::{MetadataAccount, TokenMetadata};
 
 use crate::error::StakingError;
-use crate::utils::{self, calculate_reward_rate, metadata_creator, now_ts};
+use crate::utils::{self, calculate_reward_rate, now_ts};
 
 use crate::state::*;
 
@@ -28,26 +27,6 @@ pub struct Unstake<'info> {
     #[account(address = stake_receipt.mint)]
     pub gem_mint: Account<'info, Mint>,
 
-    #[account(
-        seeds = [
-          b"metadata".as_ref(),
-          TokenMetadata::id().as_ref(),
-          gem_mint.key().as_ref(),
-        ],
-        seeds::program = TokenMetadata::id(),
-        bump,
-    )]
-    pub gem_metadata: Box<Account<'info, MetadataAccount>>,
-
-    #[account(
-        constraint = metadata_creator(&*gem_metadata)?.eq(&whitelist_proof.creator),
-        seeds = [
-            WhitelistProof::PREFIX,
-            farm.key().as_ref(),
-            metadata_creator(&*gem_metadata)?.as_ref(),
-        ],
-        bump,
-    )]
     pub whitelist_proof: Account<'info, WhitelistProof>,
 
     #[account(
@@ -98,7 +77,18 @@ impl<'info> Unstake<'info> {
     }
 }
 
-pub fn handler(ctx: Context<Unstake>, amount: u64) -> Result<()> {
+pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>, amount: u64) -> Result<()> {
+    if amount == 0 {
+        return Ok(());
+    }
+
+    WhitelistProof::validate(
+        &ctx.accounts.whitelist_proof,
+        &ctx.accounts.gem_mint,
+        ctx.program_id,
+        ctx.remaining_accounts,
+    )?;
+
     let now = now_ts()?;
     let end_ts = ctx.accounts.stake_receipt.start_ts + ctx.accounts.lock.duration;
 

@@ -8,6 +8,7 @@ pub mod state;
 pub mod utils;
 
 use instructions::*;
+use state::*;
 
 #[program]
 pub mod magicshards_staking {
@@ -21,8 +22,12 @@ pub mod magicshards_staking {
         instructions::add_manager::handler(ctx)
     }
 
-    pub fn add_to_whitelist(ctx: Context<AddToWhitelist>, reward_rate: u64) -> Result<()> {
-        instructions::add_to_whitelist::handler(ctx, reward_rate)
+    pub fn add_to_whitelist(
+        ctx: Context<AddToWhitelist>,
+        reward_rate: u64,
+        whitelist_type: WhitelistType,
+    ) -> Result<()> {
+        instructions::add_to_whitelist::handler(ctx, reward_rate, whitelist_type)
     }
 
     // Having this funcionality is quite tricky, since removing a whitelist would block the
@@ -48,11 +53,14 @@ pub mod magicshards_staking {
         instructions::initialize_farmer::handler(ctx)
     }
 
-    pub fn stake(ctx: Context<Stake>, amount: u64) -> Result<()> {
+    pub fn stake<'info>(ctx: Context<'_, '_, '_, 'info, Stake<'info>>, amount: u64) -> Result<()> {
         instructions::stake::handler(ctx, amount)
     }
 
-    pub fn unstake(ctx: Context<Unstake>, amount: u64) -> Result<()> {
+    pub fn unstake<'info>(
+        ctx: Context<'_, '_, '_, 'info, Unstake<'info>>,
+        amount: u64,
+    ) -> Result<()> {
         instructions::unstake::handler(ctx, amount)
     }
 

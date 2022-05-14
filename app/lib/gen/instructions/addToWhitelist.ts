@@ -6,18 +6,22 @@ import { PROGRAM_ID } from "../programId"
 
 export interface AddToWhitelistArgs {
   rewardRate: BN
+  whitelistType: types.WhitelistTypeKind
 }
 
 export interface AddToWhitelistAccounts {
   farm: PublicKey
   farmManager: PublicKey
   whitelistProof: PublicKey
-  creator: PublicKey
+  creatorOrMint: PublicKey
   authority: PublicKey
   systemProgram: PublicKey
 }
 
-export const layout = borsh.struct([borsh.u64("rewardRate")])
+export const layout = borsh.struct([
+  borsh.u64("rewardRate"),
+  types.WhitelistType.layout("whitelistType"),
+])
 
 export function addToWhitelist(
   args: AddToWhitelistArgs,
@@ -27,7 +31,7 @@ export function addToWhitelist(
     { pubkey: accounts.farm, isSigner: false, isWritable: false },
     { pubkey: accounts.farmManager, isSigner: false, isWritable: false },
     { pubkey: accounts.whitelistProof, isSigner: false, isWritable: true },
-    { pubkey: accounts.creator, isSigner: false, isWritable: false },
+    { pubkey: accounts.creatorOrMint, isSigner: false, isWritable: false },
     { pubkey: accounts.authority, isSigner: true, isWritable: true },
     { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
   ]
@@ -36,6 +40,7 @@ export function addToWhitelist(
   const len = layout.encode(
     {
       rewardRate: args.rewardRate,
+      whitelistType: args.whitelistType.toEncodable(),
     },
     buffer
   )

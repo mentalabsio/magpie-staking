@@ -1,4 +1,3 @@
-import { programs } from "@metaplex/js";
 import { BN, utils, web3 } from "@project-serum/anchor";
 import {
   AccountMeta,
@@ -22,8 +21,9 @@ import {
   stake,
   StakeArgs,
   unstake,
+  UnstakeArgs,
 } from "./gen/instructions";
-import { LockConfigFields } from "./gen/types";
+import { LockConfigFields, WhitelistTypeKind } from "./gen/types";
 import {
   findWhitelistProofAddress,
   findFarmAddress,
@@ -32,7 +32,7 @@ import {
   findLockAddress,
   findStakeReceiptAddress,
 } from "./pda";
-import { withParsedError } from "./utils";
+import { tryFindCreator, withParsedError } from "./utils";
 
 interface ICreateFarm {
   authority: Signer;
@@ -41,8 +41,9 @@ interface ICreateFarm {
 
 interface IAddToWhitelist {
   farm: PublicKey;
-  creator: PublicKey;
+  creatorOrMint: PublicKey;
   authority: Signer;
+  whitelistType: WhitelistTypeKind;
   rewardRate: {
     tokenAmount: BN;
     intervalInSeconds: BN;
@@ -78,6 +79,7 @@ interface IUnstake {
   farm: PublicKey;
   mint: PublicKey;
   owner: Signer;
+  args: UnstakeArgs;
 }
 
 interface IClaimRewards {
@@ -243,26 +245,27 @@ export const StakingProgram = (connection: Connection) => {
 
   const _addToWhitelist = async ({
     farm,
-    creator,
+    creatorOrMint,
     authority,
     rewardRate,
+    whitelistType,
   }: IAddToWhitelist) => {
     const farmManager = findFarmManagerAddress({
       farm,
       authority: authority.publicKey,
     });
-    const whitelistProof = findWhitelistProofAddress({ creator, farm });
+    const whitelistProof = findWhitelistProofAddress({ creatorOrMint, farm });
 
     const { tokenAmount, intervalInSeconds } = rewardRate;
 
     const ix = addToWhitelist(
-      { rewardRate: tokenAmount.div(intervalInSeconds) },
+      { rewardRate: tokenAmount.div(intervalInSeconds), whitelistType },
       {
         farm,
-        creator,
         farmManager,
-        authority: authority.publicKey,
+        creatorOrMint,
         whitelistProof,
+        authority: authority.publicKey,
         systemProgram,
       }
     );
@@ -294,18 +297,25 @@ export const StakingProgram = (connection: Connection) => {
   const _stake = async ({ owner, farm, lock, mint, args }: IStake) => {
     const farmer = findFarmerAddress({ farm, owner: owner.publicKey });
 
-    const metadata = await programs.metadata.Metadata.findByMint(
-      connection,
-      mint
-    );
+    // Initially we assume we're staking a fungible token.
+    let creatorOrMint = mint;
+    let metadata: AccountMeta | undefined;
 
-    const metadataCreator = new PublicKey(
-      metadata.data.data.creators.find((c) => c.verified).address
-    );
+    const foundMetadata = await tryFindCreator(connection, mint);
+
+    if (foundMetadata) {
+      const { metadataAddress, creatorAddress } = foundMetadata;
+      metadata = {
+        pubkey: metadataAddress,
+        isSigner: false,
+        isWritable: false,
+      };
+      creatorOrMint = creatorAddress;
+    }
 
     const whitelistProof = findWhitelistProofAddress({
       farm,
-      creator: metadataCreator,
+      creatorOrMint,
     });
 
     const farmerVault = await utils.token.associatedAddress({
@@ -325,7 +335,6 @@ export const StakingProgram = (connection: Connection) => {
       farmer,
 
       gemMint: mint,
-      gemMetadata: metadata.pubkey,
       whitelistProof,
       farmerVault,
       gemOwnerAta,
@@ -340,6 +349,8 @@ export const StakingProgram = (connection: Connection) => {
       tokenProgram,
       associatedTokenProgram,
     });
+
+    foundMetadata && ix.keys.push(metadata);
 
     const tx = new Transaction().add(ix);
 
@@ -383,21 +394,27 @@ export const StakingProgram = (connection: Connection) => {
     return { tx: txSig };
   };
 
-  const _unstake = async ({ farm, mint, owner }: IUnstake) => {
+  const _unstake = async ({ farm, mint, owner, args }: IUnstake) => {
     const farmer = findFarmerAddress({ farm, owner: owner.publicKey });
 
-    const metadata = await programs.metadata.Metadata.findByMint(
-      connection,
-      mint
-    );
+    let creatorOrMint = mint;
+    let metadata: AccountMeta | undefined;
 
-    const metadataCreator = new PublicKey(
-      metadata.data.data.creators.find((c) => c.verified).address
-    );
+    const foundMetadata = await tryFindCreator(connection, mint);
+
+    if (foundMetadata) {
+      const { metadataAddress, creatorAddress } = foundMetadata;
+      metadata = {
+        pubkey: metadataAddress,
+        isSigner: false,
+        isWritable: false,
+      };
+      creatorOrMint = creatorAddress;
+    }
 
     const whitelistProof = findWhitelistProofAddress({
       farm,
-      creator: metadataCreator,
+      creatorOrMint,
     });
 
     const farmerVault = await utils.token.associatedAddress({
@@ -414,22 +431,21 @@ export const StakingProgram = (connection: Connection) => {
 
     const lock = (await StakeReceipt.fetch(connection, stakeReceipt)).lock;
 
-    const ix = unstake(
-      { amount: new BN(1) },
-      {
-        farm,
-        farmer,
-        gemMint: mint,
-        gemMetadata: metadata.pubkey,
-        whitelistProof,
-        stakeReceipt,
-        lock,
-        farmerVault,
-        gemOwnerAta,
-        owner: owner.publicKey,
-        tokenProgram,
-      }
-    );
+    const ix = unstake(args, {
+      farm,
+      farmer,
+      gemMint: mint,
+      // gemMetadata: metadata.pubkey,
+      whitelistProof,
+      stakeReceipt,
+      lock,
+      farmerVault,
+      gemOwnerAta,
+      owner: owner.publicKey,
+      tokenProgram,
+    });
+
+    foundMetadata && ix.keys.push(metadata);
 
     const tx = new Transaction().add(ix);
 
