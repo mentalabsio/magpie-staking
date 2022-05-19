@@ -5,6 +5,7 @@ pub mod create_farm;
 pub mod create_locks;
 pub mod fund_reward;
 pub mod initialize_farmer;
+pub mod remove_from_whitelist;
 pub mod stake;
 pub mod unstake;
 
@@ -15,5 +16,6 @@ pub use create_farm::*;
 pub use create_locks::*;
 pub use fund_reward::*;
 pub use initialize_farmer::*;
+pub use remove_from_whitelist::*;
 pub use stake::*;
 pub use unstake::*;

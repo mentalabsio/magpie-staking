@@ -18,6 +18,7 @@ import {
   createLocks,
   fundReward,
   initializeFarmer,
+  removeFromWhitelist,
   stake,
   StakeArgs,
   unstake,
@@ -275,6 +276,32 @@ export const StakingProgram = (connection: Connection) => {
     return { tx: txSig, whitelistProof: whitelistProof };
   };
 
+  interface IRemoveFromWhitelist {
+    farm: PublicKey;
+    addressToRemove: PublicKey;
+    authority: PublicKey;
+  }
+
+  const createRemoveFromWhitelistInstruction = ({
+    farm,
+    addressToRemove,
+    authority,
+  }: IRemoveFromWhitelist) => {
+    const whitelistProof = findWhitelistProofAddress({
+      farm,
+      creatorOrMint: addressToRemove,
+    });
+    const farmManager = findFarmManagerAddress({ farm, authority });
+
+    return removeFromWhitelist({
+      farm,
+      authority,
+      whitelistProof,
+      systemProgram,
+      farmManager,
+    });
+  };
+
   const _initializeFarmer = async ({ farm, owner }: IInitializeFarmer) => {
     const farmer = findFarmerAddress({ farm, owner: owner.publicKey });
 
@@ -438,5 +465,6 @@ export const StakingProgram = (connection: Connection) => {
     stake: withParsedError(_stake),
     unstake: withParsedError(_unstake),
     claimRewards: withParsedError(_claimRewards),
+    createRemoveFromWhitelistInstruction,
   };
 };

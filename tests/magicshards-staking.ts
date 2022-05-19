@@ -5,7 +5,12 @@ import {
   getOrCreateAssociatedTokenAccount,
   mintTo,
 } from "@solana/spl-token";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import {
+  Keypair,
+  PublicKey,
+  sendAndConfirmTransaction,
+  Transaction,
+} from "@solana/web3.js";
 import { BN } from "bn.js";
 import { assert, expect } from "chai";
 
@@ -22,6 +27,7 @@ import {
   findFarmAddress,
   findFarmerAddress,
   findStakeReceiptAddress,
+  findWhitelistProofAddress,
 } from "../app/lib/pda";
 import { findFarmLocks } from "../app/lib/utils";
 
@@ -38,6 +44,7 @@ describe("staking-program", () => {
 
   // NFT that will be staked.
   const nft = new PublicKey("SaCd2fYycnD2wcUJWZNfF2xGAVvcUaVeTnEz7MUibm5");
+
   // Whitelisted creator address.
   const creatorAddress = new PublicKey(
     "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs"
@@ -304,6 +311,33 @@ describe("staking-program", () => {
     } catch (e) {
       expect(e).to.be.instanceOf(GemStillStaked);
     }
+  });
+
+  it("should be able to remove and address from the whitelist", async () => {
+    const farm = findFarmAddress({
+      authority: farmAuthority.publicKey,
+      rewardMint,
+    });
+
+    const ix = stakingClient.createRemoveFromWhitelistInstruction({
+      farm,
+      authority: farmAuthority.publicKey,
+      addressToRemove: rewardMint,
+    });
+
+    const tx = new Transaction().add(ix);
+    await sendAndConfirmTransaction(connection, tx, [farmAuthority]);
+
+    const whitelistProof = findWhitelistProofAddress({
+      farm,
+      creatorOrMint: rewardMint,
+    });
+    const whitelistProofAccount = await WhitelistProof.fetch(
+      connection,
+      whitelistProof
+    );
+
+    expect(whitelistProofAccount).to.be.null;
   });
 
   it("should be able to unstake a fungible token", async () => {

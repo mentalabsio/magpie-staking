@@ -5,6 +5,10 @@ export {
   AddToWhitelistArgs,
   AddToWhitelistAccounts,
 } from "./addToWhitelist"
+export {
+  removeFromWhitelist,
+  RemoveFromWhitelistAccounts,
+} from "./removeFromWhitelist"
 export { fundReward, FundRewardArgs, FundRewardAccounts } from "./fundReward"
 export {
   createLocks,
