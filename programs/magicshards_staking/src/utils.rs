@@ -1,5 +1,5 @@
 use anchor_lang::{prelude::*, system_program};
-use anchor_spl::token::Transfer;
+use anchor_spl::token;
 use solutils::wrappers::metadata::MetadataAccount;
 
 use crate::error::StakingError;
@@ -29,14 +29,15 @@ pub fn transfer_spl_ctx<'a, 'b, 'c, 'info>(
     to: AccountInfo<'info>,
     authority: AccountInfo<'info>,
     token_program: AccountInfo<'info>,
-) -> CpiContext<'a, 'b, 'c, 'info, Transfer<'info>> {
-    let cpi_accounts = Transfer {
-        from,
-        to,
-        authority,
-    };
-
-    CpiContext::new(token_program, cpi_accounts)
+) -> CpiContext<'a, 'b, 'c, 'info, token::Transfer<'info>> {
+    CpiContext::new(
+        token_program,
+        token::Transfer {
+            from,
+            to,
+            authority,
+        },
+    )
 }
 
 pub fn calculate_reward_rate(base: u64, factor: u64) -> Result<u64> {

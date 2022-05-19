@@ -3,6 +3,7 @@ export type CustomError =
   | CouldNotReserveReward
   | CouldNotReleaseReward
   | GemStillLocked
+  | GemStillStaked
   | ArithmeticError
 
 export class CooldownIsNotOver extends Error {
@@ -45,13 +46,23 @@ export class GemStillLocked extends Error {
   }
 }
 
-export class ArithmeticError extends Error {
+export class GemStillStaked extends Error {
   readonly code = 6004
+  readonly name = "GemStillStaked"
+  readonly msg = "Must unstake before staking again."
+
+  constructor() {
+    super("6004: Must unstake before staking again.")
+  }
+}
+
+export class ArithmeticError extends Error {
+  readonly code = 6005
   readonly name = "ArithmeticError"
   readonly msg = "An arithmetic error occurred."
 
   constructor() {
-    super("6004: An arithmetic error occurred.")
+    super("6005: An arithmetic error occurred.")
   }
 }
 
@@ -66,6 +77,8 @@ export function fromCode(code: number): CustomError | null {
     case 6003:
       return new GemStillLocked()
     case 6004:
+      return new GemStillStaked()
+    case 6005:
       return new ArithmeticError()
   }
 

@@ -10,6 +10,8 @@ export interface StakeReceiptFields {
   lock: PublicKey
   startTs: BN
   endTs: BN | null
+  amount: BN
+  rewardRate: BN
 }
 
 export interface StakeReceiptJSON {
@@ -18,6 +20,8 @@ export interface StakeReceiptJSON {
   lock: string
   startTs: string
   endTs: string | null
+  amount: string
+  rewardRate: string
 }
 
 export class StakeReceipt {
@@ -26,6 +30,8 @@ export class StakeReceipt {
   readonly lock: PublicKey
   readonly startTs: BN
   readonly endTs: BN | null
+  readonly amount: BN
+  readonly rewardRate: BN
 
   static readonly discriminator = Buffer.from([
     189, 110, 129, 87, 79, 225, 96, 177,
@@ -37,6 +43,8 @@ export class StakeReceipt {
     borsh.publicKey("lock"),
     borsh.u64("startTs"),
     borsh.option(borsh.u64(), "endTs"),
+    borsh.u64("amount"),
+    borsh.u64("rewardRate"),
   ])
 
   constructor(fields: StakeReceiptFields) {
@@ -45,6 +53,8 @@ export class StakeReceipt {
     this.lock = fields.lock
     this.startTs = fields.startTs
     this.endTs = fields.endTs
+    this.amount = fields.amount
+    this.rewardRate = fields.rewardRate
   }
 
   static async fetch(
@@ -94,6 +104,8 @@ export class StakeReceipt {
       lock: dec.lock,
       startTs: dec.startTs,
       endTs: dec.endTs,
+      amount: dec.amount,
+      rewardRate: dec.rewardRate,
     })
   }
 
@@ -104,6 +116,8 @@ export class StakeReceipt {
       lock: this.lock.toString(),
       startTs: this.startTs.toString(),
       endTs: (this.endTs && this.endTs.toString()) || null,
+      amount: this.amount.toString(),
+      rewardRate: this.rewardRate.toString(),
     }
   }
 
@@ -114,6 +128,8 @@ export class StakeReceipt {
       lock: new PublicKey(obj.lock),
       startTs: new BN(obj.startTs),
       endTs: (obj.endTs && new BN(obj.endTs)) || null,
+      amount: new BN(obj.amount),
+      rewardRate: new BN(obj.rewardRate),
     })
   }
 }

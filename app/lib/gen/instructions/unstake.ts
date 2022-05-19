@@ -4,15 +4,10 @@ import * as borsh from "@project-serum/borsh" // eslint-disable-line @typescript
 import * as types from "../types" // eslint-disable-line @typescript-eslint/no-unused-vars
 import { PROGRAM_ID } from "../programId"
 
-export interface UnstakeArgs {
-  amount: BN
-}
-
 export interface UnstakeAccounts {
   farm: PublicKey
   farmer: PublicKey
   gemMint: PublicKey
-  whitelistProof: PublicKey
   stakeReceipt: PublicKey
   lock: PublicKey
   farmerVault: PublicKey
@@ -21,14 +16,11 @@ export interface UnstakeAccounts {
   tokenProgram: PublicKey
 }
 
-export const layout = borsh.struct([borsh.u64("amount")])
-
-export function unstake(args: UnstakeArgs, accounts: UnstakeAccounts) {
+export function unstake(accounts: UnstakeAccounts) {
   const keys = [
     { pubkey: accounts.farm, isSigner: false, isWritable: true },
     { pubkey: accounts.farmer, isSigner: false, isWritable: true },
     { pubkey: accounts.gemMint, isSigner: false, isWritable: false },
-    { pubkey: accounts.whitelistProof, isSigner: false, isWritable: false },
     { pubkey: accounts.stakeReceipt, isSigner: false, isWritable: true },
     { pubkey: accounts.lock, isSigner: false, isWritable: false },
     { pubkey: accounts.farmerVault, isSigner: false, isWritable: true },
@@ -37,14 +29,7 @@ export function unstake(args: UnstakeArgs, accounts: UnstakeAccounts) {
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
   ]
   const identifier = Buffer.from([90, 95, 107, 42, 205, 124, 50, 225])
-  const buffer = Buffer.alloc(1000)
-  const len = layout.encode(
-    {
-      amount: args.amount,
-    },
-    buffer
-  )
-  const data = Buffer.concat([identifier, buffer]).slice(0, 8 + len)
+  const data = identifier
   const ix = new TransactionInstruction({ keys, programId: PROGRAM_ID, data })
   return ix
 }

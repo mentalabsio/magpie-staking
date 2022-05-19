@@ -6,9 +6,9 @@
 
 
 ### TODO:
-- Allow whitelisting a mint address (for spl tokens).
-- Allow staking $TOKEN.
-- Remove mint/creator from whitelist.
+- [x] Allow whitelisting a mint address (for spl tokens).
+- [x] Allow staking $TOKEN.
+- [ ] Remove mint/creator from whitelist.
 
 ### NFTabs staking rules
 - [x] Stake a pair [NFT A, NFT B] (technically can be done, but there's no program logic for the "pair" thing)

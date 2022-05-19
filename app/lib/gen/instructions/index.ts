@@ -13,5 +13,5 @@ export {
 } from "./createLocks"
 export { initializeFarmer, InitializeFarmerAccounts } from "./initializeFarmer"
 export { stake, StakeArgs, StakeAccounts } from "./stake"
-export { unstake, UnstakeArgs, UnstakeAccounts } from "./unstake"
+export { unstake, UnstakeAccounts } from "./unstake"
 export { claimRewards, ClaimRewardsAccounts } from "./claimRewards"

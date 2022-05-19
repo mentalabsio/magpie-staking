@@ -70,6 +70,9 @@ pub struct Stake<'info> {
 
 impl Stake<'_> {
     pub fn lock_gem(&self, amount: u64) -> Result<()> {
+        if amount == 0 {
+            return Ok(());
+        }
         let cpi_ctx = transfer_spl_ctx(
             self.gem_owner_ata.to_account_info(),
             self.farmer_vault.to_account_info(),
@@ -82,13 +85,8 @@ impl Stake<'_> {
 }
 
 pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, Stake<'info>>, amount: u64) -> Result<()> {
-    if amount == 0 {
-        return Ok(());
-    }
-
-    let mut amount = amount;
-
     let whitelist_proof = &ctx.accounts.whitelist_proof;
+
     WhitelistProof::validate(
         whitelist_proof,
         &ctx.accounts.gem_mint,
@@ -96,48 +94,53 @@ pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, Stake<'info>>, amount: u64
         ctx.remaining_accounts,
     )?;
 
-    if let WhitelistType::Creator = whitelist_proof.ty {
-        amount = 1;
-    }
-
     // Lock the nft to the farmer account.
     ctx.accounts.lock_gem(amount)?;
 
-    let stake_receipt = &mut ctx.accounts.stake_receipt;
     let now_ts = now_ts()?;
+    let farm = &mut ctx.accounts.farm;
 
-    if stake_receipt.farmer != Pubkey::default() {
-        // Trying to stake and NFT that's already been staked once before.
-        require_keys_eq!(stake_receipt.farmer, ctx.accounts.farmer.key());
-        require_keys_eq!(stake_receipt.mint, ctx.accounts.gem_mint.key());
+    let factor = ctx.accounts.lock.bonus_factor;
+    let base_rate = amount * ctx.accounts.whitelist_proof.reward_rate;
+    let reward_rate = calculate_reward_rate(base_rate, factor as u64)?;
 
-        if let Some(end_ts) = stake_receipt.end_ts {
-            // This NFT has already been unstaked.
-            let cooldown = ctx.accounts.lock.cooldown;
-            require_gte!(now_ts, end_ts + cooldown, StakingError::CooldownIsNotOver);
+    let stake_receipt = &mut ctx.accounts.stake_receipt;
 
-            // Here the cooldown is already over, so just update the receipt with the new
-            // information.
-            stake_receipt.end_ts = None;
-            stake_receipt.start_ts = now_ts;
-            stake_receipt.lock = ctx.accounts.lock.key();
-        }
-    } else {
+    if stake_receipt.farmer == Pubkey::default() {
         **stake_receipt = StakeReceipt {
             end_ts: None,
             start_ts: now_ts,
             lock: ctx.accounts.lock.key(),
             farmer: ctx.accounts.farmer.key(),
             mint: ctx.accounts.gem_mint.key(),
+            reward_rate,
+            amount,
         };
+    } else {
+        // Receipt account already existed.
+        // We're either trying to stake an NFT again, or just trying to stake more fungible tokens.
+        match stake_receipt.end_ts {
+            // This gem has already been unstaked.
+            Some(end_ts) => {
+                let cooldown = ctx.accounts.lock.cooldown;
+                require_gte!(now_ts, end_ts + cooldown, StakingError::CooldownIsNotOver);
+
+                // Here the cooldown is already over, so just update the receipt with the new
+                // information.
+                stake_receipt.end_ts = None;
+                stake_receipt.start_ts = now_ts;
+                stake_receipt.lock = ctx.accounts.lock.key();
+                stake_receipt.reward_rate = reward_rate;
+                stake_receipt.amount = amount;
+            }
+            None => {
+                return Err(error!(StakingError::GemStillStaked));
+            }
+        }
     }
 
-    let farm = &mut ctx.accounts.farm;
-    let factor = ctx.accounts.lock.bonus_factor;
-    let base_rate = amount * ctx.accounts.whitelist_proof.reward_rate;
-    let reward_rate = calculate_reward_rate(base_rate, factor as u64)?;
-
     let reserved_amount = reward_rate as u64 * ctx.accounts.lock.duration;
+
     farm.reward.try_reserve(reserved_amount)?;
 
     ctx.accounts

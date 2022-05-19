@@ -1,7 +1,6 @@
 import {
   Metadata,
   PROGRAM_ID as METADATA_PROGRAM_ID,
-  ShareTotalMustBe100Error,
 } from "@metaplex-foundation/mpl-token-metadata";
 import { web3, utils } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
@@ -83,19 +82,13 @@ export function withParsedError<T, U>(
     try {
       return await fn(...args);
     } catch (e) {
-      console.log(e.logs?.join("\n"));
-
       const parsed = fromTxError(e);
 
       if (parsed != null) {
-        throw new Error(parsed.msg);
+        throw parsed;
       }
 
-      const err: string = e.logs
-        ?.filter((l: string) => l.includes("Error"))
-        .join("\n");
-
-      throw new Error(err?.length > 0 ? err : e);
+      throw e;
     }
   };
 }

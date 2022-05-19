@@ -7,7 +7,7 @@ import {
 } from "@solana/spl-token";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { BN } from "bn.js";
-import { expect } from "chai";
+import { assert, expect } from "chai";
 
 import { StakingProgram } from "../app/lib";
 import {
@@ -16,6 +16,7 @@ import {
   Farmer,
   StakeReceipt,
 } from "../app/lib/gen/accounts";
+import { GemStillStaked } from "../app/lib/gen/errors/custom";
 import { LockConfigFields, WhitelistType } from "../app/lib/gen/types";
 import {
   findFarmAddress,
@@ -245,7 +246,6 @@ describe("staking-program", () => {
       farm,
       mint: nft,
       owner: userWallet,
-      args: { amount: new BN(1) },
     });
 
     const stakeReceipt = findStakeReceiptAddress({ farmer, mint: nft });
@@ -283,6 +283,29 @@ describe("staking-program", () => {
     expect(totalRewardRate.toNumber()).to.eql(expectedRewardRate);
   });
 
+  it("should not be able to stake more while still staking", async () => {
+    const farm = findFarmAddress({
+      authority: farmAuthority.publicKey,
+      rewardMint,
+    });
+
+    const locks = await findFarmLocks(connection, farm);
+    const lock = locks.find((lock) => lock.bonusFactor === 0);
+
+    try {
+      await stakingClient.stake({
+        farm,
+        mint: rewardMint,
+        lock: lock.address,
+        owner: userWallet,
+        args: { amount: new BN(5e8) },
+      });
+      assert(false);
+    } catch (e) {
+      expect(e).to.be.instanceOf(GemStillStaked);
+    }
+  });
+
   it("should be able to unstake a fungible token", async () => {
     // Sleep for 2 seconds so the rewards get updated.
     await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -296,7 +319,6 @@ describe("staking-program", () => {
       farm,
       mint: rewardMint,
       owner: userWallet,
-      args: { amount: new BN(5e8) },
     });
 
     const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });

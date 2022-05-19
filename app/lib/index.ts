@@ -21,7 +21,6 @@ import {
   stake,
   StakeArgs,
   unstake,
-  UnstakeArgs,
 } from "./gen/instructions";
 import { LockConfigFields, WhitelistTypeKind } from "./gen/types";
 import {
@@ -79,7 +78,6 @@ interface IUnstake {
   farm: PublicKey;
   mint: PublicKey;
   owner: Signer;
-  args: UnstakeArgs;
 }
 
 interface IClaimRewards {
@@ -394,28 +392,8 @@ export const StakingProgram = (connection: Connection) => {
     return { tx: txSig };
   };
 
-  const _unstake = async ({ farm, mint, owner, args }: IUnstake) => {
+  const _unstake = async ({ farm, mint, owner }: IUnstake) => {
     const farmer = findFarmerAddress({ farm, owner: owner.publicKey });
-
-    let creatorOrMint = mint;
-    let metadata: AccountMeta | undefined;
-
-    const foundMetadata = await tryFindCreator(connection, mint);
-
-    if (foundMetadata) {
-      const { metadataAddress, creatorAddress } = foundMetadata;
-      metadata = {
-        pubkey: metadataAddress,
-        isSigner: false,
-        isWritable: false,
-      };
-      creatorOrMint = creatorAddress;
-    }
-
-    const whitelistProof = findWhitelistProofAddress({
-      farm,
-      creatorOrMint,
-    });
 
     const farmerVault = await utils.token.associatedAddress({
       mint,
@@ -431,12 +409,10 @@ export const StakingProgram = (connection: Connection) => {
 
     const lock = (await StakeReceipt.fetch(connection, stakeReceipt)).lock;
 
-    const ix = unstake(args, {
+    const ix = unstake({
       farm,
       farmer,
       gemMint: mint,
-      // gemMetadata: metadata.pubkey,
-      whitelistProof,
       stakeReceipt,
       lock,
       farmerVault,
@@ -444,8 +420,6 @@ export const StakingProgram = (connection: Connection) => {
       owner: owner.publicKey,
       tokenProgram,
     });
-
-    foundMetadata && ix.keys.push(metadata);
 
     const tx = new Transaction().add(ix);
 

@@ -57,11 +57,8 @@ pub mod magicshards_staking {
         instructions::stake::handler(ctx, amount)
     }
 
-    pub fn unstake<'info>(
-        ctx: Context<'_, '_, '_, 'info, Unstake<'info>>,
-        amount: u64,
-    ) -> Result<()> {
-        instructions::unstake::handler(ctx, amount)
+    pub fn unstake<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result<()> {
+        instructions::unstake::handler(ctx)
     }
 
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {

@@ -14,6 +14,9 @@ pub enum StakingError {
     #[msg("Cannot unstake while the gem is still locked.")]
     GemStillLocked,
 
+    #[msg("Must unstake before staking again.")]
+    GemStillStaked,
+
     #[msg("An arithmetic error occurred.")]
     ArithmeticError,
 }
