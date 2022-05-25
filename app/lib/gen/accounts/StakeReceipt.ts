@@ -12,7 +12,7 @@ export interface StakeReceiptFields {
   endTs: BN | null
   amount: BN
   rewardRate: BN
-  buff: PublicKey | null
+  buff: types.BuffFields | null
 }
 
 export interface StakeReceiptJSON {
@@ -23,7 +23,7 @@ export interface StakeReceiptJSON {
   endTs: string | null
   amount: string
   rewardRate: string
-  buff: string | null
+  buff: types.BuffJSON | null
 }
 
 export class StakeReceipt {
@@ -34,7 +34,7 @@ export class StakeReceipt {
   readonly endTs: BN | null
   readonly amount: BN
   readonly rewardRate: BN
-  readonly buff: PublicKey | null
+  readonly buff: types.Buff | null
 
   static readonly discriminator = Buffer.from([
     189, 110, 129, 87, 79, 225, 96, 177,
@@ -48,7 +48,7 @@ export class StakeReceipt {
     borsh.option(borsh.u64(), "endTs"),
     borsh.u64("amount"),
     borsh.u64("rewardRate"),
-    borsh.option(borsh.publicKey(), "buff"),
+    borsh.option(types.Buff.layout(), "buff"),
   ])
 
   constructor(fields: StakeReceiptFields) {
@@ -59,7 +59,7 @@ export class StakeReceipt {
     this.endTs = fields.endTs
     this.amount = fields.amount
     this.rewardRate = fields.rewardRate
-    this.buff = fields.buff
+    this.buff = (fields.buff && new types.Buff({ ...fields.buff })) || null
   }
 
   static async fetch(
@@ -111,7 +111,7 @@ export class StakeReceipt {
       endTs: dec.endTs,
       amount: dec.amount,
       rewardRate: dec.rewardRate,
-      buff: dec.buff,
+      buff: (dec.buff && types.Buff.fromDecoded(dec.buff)) || null,
     })
   }
 
@@ -124,7 +124,7 @@ export class StakeReceipt {
       endTs: (this.endTs && this.endTs.toString()) || null,
       amount: this.amount.toString(),
       rewardRate: this.rewardRate.toString(),
-      buff: (this.buff && this.buff.toString()) || null,
+      buff: (this.buff && this.buff.toJSON()) || null,
     }
   }
 
@@ -137,7 +137,7 @@ export class StakeReceipt {
       endTs: (obj.endTs && new BN(obj.endTs)) || null,
       amount: new BN(obj.amount),
       rewardRate: new BN(obj.rewardRate),
-      buff: (obj.buff && new PublicKey(obj.buff)) || null,
+      buff: (obj.buff && types.Buff.fromJSON(obj.buff)) || null,
     })
   }
 }

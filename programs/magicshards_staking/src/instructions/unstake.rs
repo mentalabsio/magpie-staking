@@ -76,6 +76,11 @@ impl<'info> Unstake<'info> {
 }
 
 pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result<()> {
+    require!(
+        ctx.accounts.stake_receipt.buff.is_none(),
+        StakingError::GemStillBuffed
+    );
+
     let now = now_ts()?;
     let end_ts = ctx
         .accounts

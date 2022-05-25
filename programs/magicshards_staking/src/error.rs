@@ -17,16 +17,22 @@ pub enum StakingError {
     #[msg("Must unstake before staking again.")]
     GemStillStaked,
 
-    #[msg("Invalid whitelist type")]
-    InvalidWhitelist,
+    #[msg("Attempt to operate on a gem that is no longer staked.")]
+    GemNotStaked,
 
     #[msg("This NFT is already being buffed.")]
-    NFTAlreadyBuffed,
+    GemAlreadyBuffed,
 
-    #[msg("Cannot buff an unstaked NFT.")]
-    BuffUnstaked,
+    #[msg("This NFT was not buffed.")]
+    GemNotBuffed,
 
-    #[msg("Buff factor must be greater than 0")]
+    #[msg("The gem must be debuffed before realizing this operation.")]
+    GemStillBuffed,
+
+    #[msg("Invalid whitelist type.")]
+    InvalidWhitelistType,
+
+    #[msg("Buff factor must be greater than 0.")]
     FactorMustBeGtZero,
 
     #[msg("An arithmetic error occurred.")]

@@ -61,6 +61,10 @@ pub mod magicshards_staking {
         instructions::buff_pair::handler(ctx)
     }
 
+    pub fn debuff_pair(ctx: Context<DebuffPair>) -> Result<()> {
+        instructions::debuff_pair::handler(ctx)
+    }
+
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
         instructions::claim_rewards::handler(ctx)
     }

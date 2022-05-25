@@ -10,11 +10,17 @@ use crate::{error::StakingError, state::*};
 pub struct BuffPair<'info> {
     #[account(mut)]
     pub farm: Account<'info, Farm>,
-    #[account(mut)]
+
+    #[account(mut, has_one = farm)]
     pub farmer: Account<'info, Farmer>,
 
     pub buff_mint: Account<'info, Mint>,
 
+    #[account(
+        constraint =
+            buff_whitelist.ty == WhitelistType::Buff
+            @ StakingError::InvalidWhitelistType
+    )]
     pub buff_whitelist: Account<'info, WhitelistProof>,
 
     #[account(
@@ -58,7 +64,7 @@ pub struct BuffPair<'info> {
     )]
     pub mint_b_receipt: Box<Account<'info, StakeReceipt>>,
 
-    #[account(mut)]
+    #[account(mut, address = farmer.owner)]
     pub authority: Signer<'info>,
 
     pub rent: Sysvar<'info, Rent>,
@@ -83,19 +89,12 @@ impl<'info> BuffPair<'info> {
 }
 
 pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, BuffPair<'info>>) -> Result<()> {
-    let wl_type = ctx.accounts.buff_whitelist.ty;
-
     WhitelistProof::validate(
         &ctx.accounts.buff_whitelist,
         &ctx.accounts.buff_mint,
         ctx.program_id,
         ctx.remaining_accounts,
     )?;
-
-    require!(
-        wl_type == WhitelistType::Buff,
-        StakingError::InvalidWhitelist
-    );
 
     let buff_key = ctx.accounts.buff_mint.key();
     let buff_factor = ctx.accounts.buff_whitelist.reward_rate;

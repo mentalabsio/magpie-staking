@@ -47,12 +47,6 @@ impl Reward {
             .checked_sub(increment)
             .ok_or(StakingError::ArithmeticError)?;
 
-        msg!(
-            "Farm rewards updated!\nAvailable: {}\nReserved: {}\n",
-            self.available,
-            self.reserved
-        );
-
         Ok(())
     }
 
