@@ -6,16 +6,12 @@
 
 
 ### TODO:
-- [x] Allow whitelisting a mint address (for spl tokens).
-- [x] Allow staking $TOKEN.
-- [ ] Remove mint/creator from whitelist.
+- [x] Allow whitelisting a mint address (for fungible tokens).
+- [x] Allow staking fungible tokens.
+- [x] Remove mint/creator from whitelist.
 
 ### NFTabs staking rules
 - [x] Stake a pair [NFT A, NFT B] (technically can be done, but there's no program logic for the "pair" thing)
-- [ ] Buff a staked pair with NFT C. (since there's no logic for the pair, there's no way to buff it)
-- [ ] Stake $TOKENS with lock.
-
-### Prodigy staking rules
-- [x] Stake and NFT with a bonus for the lock period.
-- [ ] Use NFT off-chain metadata to calculate final reward.
+- [x] Buff a staked pair with NFT C. 
+- [x] Stake $TOKENS with lock.
 
