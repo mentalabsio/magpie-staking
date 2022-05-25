@@ -4,6 +4,10 @@ export type CustomError =
   | CouldNotReleaseReward
   | GemStillLocked
   | GemStillStaked
+  | InvalidWhitelist
+  | NFTAlreadyBuffed
+  | BuffUnstaked
+  | FactorMustBeGtZero
   | ArithmeticError
 
 export class CooldownIsNotOver extends Error {
@@ -56,13 +60,53 @@ export class GemStillStaked extends Error {
   }
 }
 
-export class ArithmeticError extends Error {
+export class InvalidWhitelist extends Error {
   readonly code = 6005
+  readonly name = "InvalidWhitelist"
+  readonly msg = "Invalid whitelist type"
+
+  constructor() {
+    super("6005: Invalid whitelist type")
+  }
+}
+
+export class NFTAlreadyBuffed extends Error {
+  readonly code = 6006
+  readonly name = "NFTAlreadyBuffed"
+  readonly msg = "This NFT is already being buffed."
+
+  constructor() {
+    super("6006: This NFT is already being buffed.")
+  }
+}
+
+export class BuffUnstaked extends Error {
+  readonly code = 6007
+  readonly name = "BuffUnstaked"
+  readonly msg = "Cannot buff an unstaked NFT."
+
+  constructor() {
+    super("6007: Cannot buff an unstaked NFT.")
+  }
+}
+
+export class FactorMustBeGtZero extends Error {
+  readonly code = 6008
+  readonly name = "FactorMustBeGtZero"
+  readonly msg = "Buff factor must be greater than 0"
+
+  constructor() {
+    super("6008: Buff factor must be greater than 0")
+  }
+}
+
+export class ArithmeticError extends Error {
+  readonly code = 6009
   readonly name = "ArithmeticError"
   readonly msg = "An arithmetic error occurred."
 
   constructor() {
-    super("6005: An arithmetic error occurred.")
+    super("6009: An arithmetic error occurred.")
   }
 }
 
@@ -79,6 +123,14 @@ export function fromCode(code: number): CustomError | null {
     case 6004:
       return new GemStillStaked()
     case 6005:
+      return new InvalidWhitelist()
+    case 6006:
+      return new NFTAlreadyBuffed()
+    case 6007:
+      return new BuffUnstaked()
+    case 6008:
+      return new FactorMustBeGtZero()
+    case 6009:
       return new ArithmeticError()
   }
 

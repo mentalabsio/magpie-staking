@@ -13,6 +13,7 @@ import { Farm, StakeReceipt } from "./gen/accounts";
 import {
   addManager,
   addToWhitelist,
+  buffPair,
   claimRewards,
   createFarm,
   createLocks,
@@ -42,7 +43,7 @@ interface ICreateFarm {
 interface IAddToWhitelist {
   farm: PublicKey;
   creatorOrMint: PublicKey;
-  authority: Signer;
+  authority: PublicKey;
   whitelistType: WhitelistTypeKind;
   rewardRate: {
     tokenAmount: BN;
@@ -50,8 +51,20 @@ interface IAddToWhitelist {
   };
 }
 
+interface IRemoveFromWhitelist {
+  farm: PublicKey;
+  addressToRemove: PublicKey;
+  authority: PublicKey;
+}
+
 interface ICreateLocks {
   lockConfigs: LockConfigFields[];
+  farm: PublicKey;
+  authority: Signer;
+}
+
+interface IFundReward {
+  amount: BN;
   farm: PublicKey;
   authority: Signer;
 }
@@ -72,13 +85,20 @@ interface IStake {
   mint: PublicKey;
   lock: PublicKey;
   args: StakeArgs;
-  owner: Signer;
+  owner: PublicKey;
 }
 
 interface IUnstake {
   farm: PublicKey;
   mint: PublicKey;
   owner: Signer;
+}
+
+interface IBuffPair {
+  farm: PublicKey;
+  buffMint: PublicKey;
+  pair: [PublicKey, PublicKey];
+  authority: PublicKey;
 }
 
 interface IClaimRewards {
@@ -198,12 +218,6 @@ export const StakingProgram = (connection: Connection) => {
     return { tx: txSig };
   };
 
-  interface IFundReward {
-    amount: BN;
-    farm: PublicKey;
-    authority: Signer;
-  }
-
   const _fundReward = async ({ amount, farm, authority }: IFundReward) => {
     const farmAccount = await Farm.fetch(connection, farm);
 
@@ -242,7 +256,7 @@ export const StakingProgram = (connection: Connection) => {
     return { tx: txSig };
   };
 
-  const _addToWhitelist = async ({
+  const createAddToWhitelistInstruction = async ({
     farm,
     creatorOrMint,
     authority,
@@ -251,7 +265,7 @@ export const StakingProgram = (connection: Connection) => {
   }: IAddToWhitelist) => {
     const farmManager = findFarmManagerAddress({
       farm,
-      authority: authority.publicKey,
+      authority,
     });
     const whitelistProof = findWhitelistProofAddress({ creatorOrMint, farm });
 
@@ -264,23 +278,13 @@ export const StakingProgram = (connection: Connection) => {
         farmManager,
         creatorOrMint,
         whitelistProof,
-        authority: authority.publicKey,
+        authority,
         systemProgram,
       }
     );
 
-    const tx = new Transaction().add(ix);
-
-    const txSig = await sendAndConfirmTransaction(connection, tx, [authority]);
-
-    return { tx: txSig, whitelistProof: whitelistProof };
+    return { ix };
   };
-
-  interface IRemoveFromWhitelist {
-    farm: PublicKey;
-    addressToRemove: PublicKey;
-    authority: PublicKey;
-  }
 
   const createRemoveFromWhitelistInstruction = ({
     farm,
@@ -319,8 +323,14 @@ export const StakingProgram = (connection: Connection) => {
     return { tx: txSig, farmer };
   };
 
-  const _stake = async ({ owner, farm, lock, mint, args }: IStake) => {
-    const farmer = findFarmerAddress({ farm, owner: owner.publicKey });
+  const createStakeInstruction = async ({
+    owner,
+    farm,
+    lock,
+    mint,
+    args,
+  }: IStake) => {
+    const farmer = findFarmerAddress({ farm, owner });
 
     // Initially we assume we're staking a fungible token.
     let creatorOrMint = mint;
@@ -350,7 +360,7 @@ export const StakingProgram = (connection: Connection) => {
 
     const gemOwnerAta = await utils.token.associatedAddress({
       mint,
-      owner: owner.publicKey,
+      owner,
     });
 
     const stakeReceipt = findStakeReceiptAddress({ farmer, mint });
@@ -367,7 +377,7 @@ export const StakingProgram = (connection: Connection) => {
       lock,
       stakeReceipt,
 
-      owner: owner.publicKey,
+      owner,
 
       rent,
       systemProgram,
@@ -377,11 +387,7 @@ export const StakingProgram = (connection: Connection) => {
 
     foundMetadata && ix.keys.push(metadata);
 
-    const tx = new Transaction().add(ix);
-
-    const txSig = await sendAndConfirmTransaction(connection, tx, [owner]);
-
-    return { tx: txSig, stakeReceipt };
+    return { ix };
   };
 
   const _claimRewards = async ({ farm, authority }: IClaimRewards) => {
@@ -455,16 +461,93 @@ export const StakingProgram = (connection: Connection) => {
     return { tx: txSig, stakeReceipt };
   };
 
+  const createBuffPairInstruction = async ({
+    farm,
+    buffMint,
+    pair,
+    authority,
+  }: IBuffPair) => {
+    const farmer = findFarmerAddress({ farm, owner: authority });
+
+    const { metadataAddress, creatorAddress } = await tryFindCreator(
+      connection,
+      buffMint
+    );
+
+    const metadata = {
+      pubkey: metadataAddress,
+      isSigner: false,
+      isWritable: false,
+    };
+
+    const buffUserAta = await utils.token.associatedAddress({
+      mint: buffMint,
+      owner: authority,
+    });
+
+    const buffVault = await utils.token.associatedAddress({
+      mint: buffMint,
+      owner: farmer,
+    });
+
+    const buffWhitelist = findWhitelistProofAddress({
+      farm,
+      creatorOrMint: creatorAddress,
+    });
+
+    const [
+      { mint: mintA, receipt: mintAReceipt, whitelist: mintAWhitelist },
+      { mint: mintB, receipt: mintBReceipt, whitelist: mintBWhitelist },
+    ] = pair.map((mint) => {
+      const receipt = findStakeReceiptAddress({ farmer, mint });
+      const whitelist = findWhitelistProofAddress({
+        farm,
+        creatorOrMint: mint,
+      });
+      return { mint, receipt, whitelist };
+    });
+
+    const ix = buffPair({
+      farm,
+      farmer,
+
+      buffMint,
+      buffUserAta,
+      buffVault,
+      buffWhitelist,
+
+      mintA,
+      mintAReceipt,
+      mintAWhitelist,
+
+      mintB,
+      mintBReceipt,
+      mintBWhitelist,
+
+      authority,
+
+      rent,
+      systemProgram,
+      tokenProgram,
+      associatedTokenProgram,
+    });
+
+    ix.keys.push(metadata);
+
+    return { ix };
+  };
+
   return {
     createFarm: withParsedError(_createFarm),
     createLocks: withParsedError(_createLocks),
     fundReward: withParsedError(_fundReward),
     addManager: withParsedError(_addManager),
-    addToWhitelist: withParsedError(_addToWhitelist),
     initializeFarmer: withParsedError(_initializeFarmer),
-    stake: withParsedError(_stake),
     unstake: withParsedError(_unstake),
     claimRewards: withParsedError(_claimRewards),
+    createStakeInstruction,
+    createAddToWhitelistInstruction,
     createRemoveFromWhitelistInstruction,
+    createBuffPairInstruction,
   };
 };

@@ -18,4 +18,5 @@ export {
 export { initializeFarmer, InitializeFarmerAccounts } from "./initializeFarmer"
 export { stake, StakeArgs, StakeAccounts } from "./stake"
 export { unstake, UnstakeAccounts } from "./unstake"
+export { buffPair, BuffPairAccounts } from "./buffPair"
 export { claimRewards, ClaimRewardsAccounts } from "./claimRewards"

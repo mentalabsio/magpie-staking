@@ -27,15 +27,35 @@ startup_wait = 20000
 [[test.validator.clone]]
 address = "7CY9dKWDQimK43RkGXyT7BUpgvUGduSbCRt4RNpv2L8w"
 
-# NFT
+# NFT 1
 [[test.validator.clone]]
 address = "SaCd2fYycnD2wcUJWZNfF2xGAVvcUaVeTnEz7MUibm5"
-# User NFT ATA
+# User NFT 1 ATA
 [[test.validator.clone]]
 address = "CnKACXHgGjsmm2EXMbyLbJ6YJigYtuxHCZg6KGRZKpz8"
 # NFT metadata
 [[test.validator.clone]]
 address = "5pZpkrsRVpX5frmnebSacLngp1toBzz8aGbGbwiKuxm8"
+
+# NFT 2
+[[test.validator.clone]]
+address = "F8DBPPFwjddGdqs4EXdJTj3xqC8NE8FzUEzYQfMXt8Rs"
+# User NFT 2 ATA
+[[test.validator.clone]]
+address = "5kACGCzuDHg6GJ4X8m44aETeS1fyDsu86qKtcjJBwQJb"
+# Metadata
+[[test.validator.clone]]
+address = "3QQrznBBRmhY8gvxqPaDP5jCdcz6kjqUaKG2k97Pww3D"
+
+# Buff NFT
+[[test.validator.clone]]
+address = "Cfm3x9CXn1jDJK2k67h3KiDMWSxerKCqf4ZHZF9ydPq2"
+# User Buff NFT ATA
+[[test.validator.clone]]
+address = "3bJSSruUJ7i2jW2HGRF6gk1ZaVjb4CTHpcHCKiRBriW5"
+# Metadata
+[[test.validator.clone]]
+address = "7iEeMZQMRvqPmLTePw6P2imTZSq4H325ugWdbKPhMMuJ"
 
 ### PROGRAMS
 

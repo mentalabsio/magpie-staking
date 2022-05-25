@@ -6,10 +6,13 @@ import {
   mintTo,
 } from "@solana/spl-token";
 import {
+  Connection,
   Keypair,
   PublicKey,
   sendAndConfirmTransaction,
+  Signer,
   Transaction,
+  TransactionInstruction,
 } from "@solana/web3.js";
 import { BN } from "bn.js";
 import { assert, expect } from "chai";
@@ -21,6 +24,7 @@ import {
   Farmer,
   StakeReceipt,
 } from "../app/lib/gen/accounts";
+import { fromTxError } from "../app/lib/gen/errors";
 import { GemStillStaked } from "../app/lib/gen/errors/custom";
 import { LockConfigFields, WhitelistType } from "../app/lib/gen/types";
 import {
@@ -29,7 +33,17 @@ import {
   findStakeReceiptAddress,
   findWhitelistProofAddress,
 } from "../app/lib/pda";
-import { findFarmLocks } from "../app/lib/utils";
+import { findFarmLocks, withParsedError } from "../app/lib/utils";
+
+const send = async (
+  connection: Connection,
+  ixs: TransactionInstruction[],
+  signers: Signer[]
+) => {
+  const tx = new Transaction().add(...ixs);
+
+  return sendAndConfirmTransaction(connection, tx, signers);
+};
 
 describe("staking-program", () => {
   // Configure the client to use the local cluster.
@@ -137,12 +151,19 @@ describe("staking-program", () => {
       rewardMint,
     });
 
-    const { whitelistProof } = await stakingClient.addToWhitelist({
+    const { ix } = await stakingClient.createAddToWhitelistInstruction({
       creatorOrMint: creatorAddress,
-      authority: farmAuthority,
+      authority: farmAuthority.publicKey,
       farm,
       rewardRate: { tokenAmount: new BN(100), intervalInSeconds: new BN(1) },
       whitelistType: new WhitelistType.Creator(),
+    });
+
+    await send(connection, [ix], [farmAuthority]);
+
+    const whitelistProof = findWhitelistProofAddress({
+      farm,
+      creatorOrMint: creatorAddress,
     });
 
     const whitelistProofAccount = await WhitelistProof.fetch(
@@ -162,12 +183,19 @@ describe("staking-program", () => {
       rewardMint,
     });
 
-    const { whitelistProof } = await stakingClient.addToWhitelist({
+    const { ix } = await stakingClient.createAddToWhitelistInstruction({
       creatorOrMint: rewardMint,
-      authority: farmAuthority,
+      authority: farmAuthority.publicKey,
       farm,
       rewardRate: { tokenAmount: new BN(1), intervalInSeconds: new BN(1) },
       whitelistType: new WhitelistType.Mint(),
+    });
+
+    await send(connection, [ix], [farmAuthority]);
+
+    const whitelistProof = findWhitelistProofAddress({
+      farm,
+      creatorOrMint: rewardMint,
     });
 
     const whitelistProofAccount = await WhitelistProof.fetch(
@@ -210,13 +238,15 @@ describe("staking-program", () => {
     const locks = await findFarmLocks(connection, farm);
     const lock = locks.find((lock) => lock.bonusFactor === 0);
 
-    await stakingClient.stake({
+    const { ix } = await stakingClient.createStakeInstruction({
       farm,
       mint: nft,
       lock: lock.address,
-      owner: userWallet,
+      owner: userWallet.publicKey,
       args: { amount: new BN(1) },
     });
+
+    await send(connection, [ix], [userWallet]);
 
     const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
 
@@ -236,6 +266,60 @@ describe("staking-program", () => {
     expect(reward.available.toNumber()).to.equal(
       100_000e9 - expectedReservedReward
     );
+  });
+
+  it("should be able to buff a pair", async () => {
+    const farm = findFarmAddress({
+      authority: farmAuthority.publicKey,
+      rewardMint,
+    });
+
+    const buffMint = new PublicKey(
+      "Cfm3x9CXn1jDJK2k67h3KiDMWSxerKCqf4ZHZF9ydPq2"
+    );
+    const buffCreator = new PublicKey(
+      "J1E9xvBsE8gwfV8qXVxbQ6H2wfEEKjRaxS2ENiZm4h2D"
+    );
+    const otherNft = new PublicKey(
+      "F8DBPPFwjddGdqs4EXdJTj3xqC8NE8FzUEzYQfMXt8Rs"
+    );
+
+    const whitelistBuff = await stakingClient.createAddToWhitelistInstruction({
+      farm,
+      authority: farmAuthority.publicKey,
+      rewardRate: { tokenAmount: new BN(2), intervalInSeconds: new BN(1) },
+      creatorOrMint: buffCreator,
+      whitelistType: new WhitelistType.Buff(),
+    });
+
+    const locks = await findFarmLocks(connection, farm);
+    const lock = locks.find((lock) => lock.bonusFactor === 0);
+
+    const stakeNft = await stakingClient.createStakeInstruction({
+      farm,
+      owner: userWallet.publicKey,
+      mint: otherNft,
+      lock: lock.address,
+      args: { amount: new BN(1) },
+    });
+
+    const { ix } = await stakingClient.createBuffPairInstruction({
+      farm,
+      buffMint,
+      pair: [nft, otherNft],
+      authority: userWallet.publicKey,
+    });
+
+    await send(
+      connection,
+      [whitelistBuff.ix, stakeNft.ix, ix],
+      [farmAuthority, userWallet]
+    );
+
+    const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
+    const farmerAccount = await Farmer.fetch(connection, farmer);
+
+    expect(farmerAccount.totalRewardRate).to.eql(new BN(400));
   });
 
   it("should be able to unstake an NFT", async () => {
@@ -276,13 +360,15 @@ describe("staking-program", () => {
     const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
 
     // Stake 0.5 tokens
-    await stakingClient.stake({
+    const { ix } = await stakingClient.createStakeInstruction({
       farm,
       mint: rewardMint,
       lock: lock.address,
-      owner: userWallet,
+      owner: userWallet.publicKey,
       args: { amount: new BN(5e8) },
     });
+
+    await send(connection, [ix], [userWallet]);
 
     const { totalRewardRate } = await Farmer.fetch(connection, farmer);
     const expectedRewardRate = 5e8 * Math.floor(1 + lock.bonusFactor / 100);
@@ -300,16 +386,19 @@ describe("staking-program", () => {
     const lock = locks.find((lock) => lock.bonusFactor === 0);
 
     try {
-      await stakingClient.stake({
+      const { ix } = await stakingClient.createStakeInstruction({
         farm,
         mint: rewardMint,
         lock: lock.address,
-        owner: userWallet,
+        owner: userWallet.publicKey,
         args: { amount: new BN(5e8) },
       });
+
+      await send(connection, [ix], [userWallet]);
       assert(false);
     } catch (e) {
-      expect(e).to.be.instanceOf(GemStillStaked);
+      const parsed = fromTxError(e);
+      expect(parsed).to.be.instanceOf(GemStillStaked);
     }
   });
 
