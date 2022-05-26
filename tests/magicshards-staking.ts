@@ -24,7 +24,6 @@ import {
   Farmer,
   StakeReceipt,
 } from "../app/lib/gen/accounts";
-import { fromTxError } from "../app/lib/gen/errors";
 import { GemStillStaked } from "../app/lib/gen/errors/custom";
 import { LockConfigFields, WhitelistType } from "../app/lib/gen/types";
 import {
@@ -95,8 +94,15 @@ describe("staking-program", () => {
   });
 
   it("should be able to create a new farm.", async () => {
-    const { farm } = await stakingClient.createFarm({
-      authority: farmAuthority,
+    const { ix } = await stakingClient.createCreateFarmInstruction({
+      authority: farmAuthority.publicKey,
+      rewardMint,
+    });
+
+    await withParsedError(send)(connection, ix, [farmAuthority]);
+
+    const farm = findFarmAddress({
+      authority: farmAuthority.publicKey,
       rewardMint,
     });
 
@@ -123,11 +129,13 @@ describe("staking-program", () => {
       { duration: ONE_WEEK.muln(4), bonusFactor: 75, cooldown: new BN(0) },
     ];
 
-    await stakingClient.createLocks({
+    const { ix } = await stakingClient.createCreateLocksInstruction({
       farm,
-      authority: farmAuthority,
+      authority: farmAuthority.publicKey,
       lockConfigs,
     });
+
+    await withParsedError(send)(connection, [ix], [farmAuthority]);
 
     const locks = (await findFarmLocks(connection, farm)).map((acc) =>
       acc.toJSON()
@@ -145,11 +153,13 @@ describe("staking-program", () => {
       rewardMint: rewardMint,
     });
 
-    await stakingClient.fundReward({
+    const { ix } = await stakingClient.createFundRewardInstruction({
       farm,
-      authority: farmAuthority,
+      authority: farmAuthority.publicKey,
       amount: new BN(100_000e9),
     });
+
+    await withParsedError(send)(connection, [ix], [farmAuthority]);
 
     const farmAccount = await Farm.fetch(connection, farm);
 
@@ -163,15 +173,30 @@ describe("staking-program", () => {
       rewardMint,
     });
 
-    const { ix } = await stakingClient.createAddToWhitelistInstruction({
-      creatorOrMint: creatorAddress,
-      authority: farmAuthority.publicKey,
+    const whitelistBuff = await stakingClient.createAddToWhitelistInstruction({
       farm,
-      rewardRate: { tokenAmount: new BN(100), intervalInSeconds: new BN(1) },
-      whitelistType: new WhitelistType.Creator(),
+      authority: farmAuthority.publicKey,
+      // Since this is a buff, the rewardRate will act as a multiplier.
+      // Here it will buff the pair reward in 2x.
+      rewardRate: { tokenAmount: new BN(2), intervalInSeconds: new BN(1) },
+      creatorOrMint: buffCreator,
+      whitelistType: new WhitelistType.Buff(),
     });
 
-    await withParsedError(send)(connection, [ix], [farmAuthority]);
+    const whitelistCreator =
+      await stakingClient.createAddToWhitelistInstruction({
+        creatorOrMint: creatorAddress,
+        authority: farmAuthority.publicKey,
+        farm,
+        rewardRate: { tokenAmount: new BN(100), intervalInSeconds: new BN(1) },
+        whitelistType: new WhitelistType.Creator(),
+      });
+
+    await withParsedError(send)(
+      connection,
+      [whitelistBuff.ix, whitelistCreator.ix],
+      [farmAuthority]
+    );
 
     const whitelistProof = findWhitelistProofAddress({
       farm,
@@ -226,9 +251,16 @@ describe("staking-program", () => {
       rewardMint,
     });
 
-    const { farmer } = await stakingClient.initializeFarmer({
+    const { ix } = await stakingClient.createInitializeFarmerInstruction({
       farm,
-      owner: userWallet,
+      owner: userWallet.publicKey,
+    });
+
+    await withParsedError(send)(connection, [ix], [userWallet]);
+
+    const farmer = findFarmerAddress({
+      farm,
+      owner: userWallet.publicKey,
     });
 
     const { totalRewardRate, accruedRewards, owner } = await Farmer.fetch(
@@ -286,14 +318,6 @@ describe("staking-program", () => {
       rewardMint,
     });
 
-    const whitelistBuff = await stakingClient.createAddToWhitelistInstruction({
-      farm,
-      authority: farmAuthority.publicKey,
-      rewardRate: { tokenAmount: new BN(2), intervalInSeconds: new BN(1) },
-      creatorOrMint: buffCreator,
-      whitelistType: new WhitelistType.Buff(),
-    });
-
     const locks = await findFarmLocks(connection, farm);
     const lock = locks.find((lock) => lock.bonusFactor === 0);
 
@@ -314,7 +338,7 @@ describe("staking-program", () => {
 
     await withParsedError(send)(
       connection,
-      [whitelistBuff.ix, stakeNft.ix, ix],
+      [stakeNft.ix, ix],
       [farmAuthority, userWallet]
     );
 
@@ -432,8 +456,7 @@ describe("staking-program", () => {
       await withParsedError(send)(connection, [ix], [userWallet]);
       assert(false);
     } catch (e) {
-      const parsed = fromTxError(e);
-      expect(parsed).to.be.instanceOf(GemStillStaked);
+      expect(e).to.be.instanceOf(GemStillStaked);
     }
   });
 
@@ -496,10 +519,12 @@ describe("staking-program", () => {
       rewardMint,
     });
 
-    await stakingClient.claimRewards({
+    const { ix } = await stakingClient.createClaimRewardsInstruction({
       farm,
-      authority: userWallet,
+      authority: userWallet.publicKey,
     });
+
+    await withParsedError(send)(connection, [ix], [userWallet]);
 
     const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
     const farmerAccount = await Farmer.fetch(connection, farmer);
