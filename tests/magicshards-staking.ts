@@ -41,7 +41,7 @@ const send = (
 ) => {
   const tx = new Transaction().add(...ixs);
 
-  return sendAndConfirmTransaction(connection, tx, signers);
+  return withParsedError(sendAndConfirmTransaction)(connection, tx, signers);
 };
 
 describe("staking-program", () => {
@@ -99,7 +99,7 @@ describe("staking-program", () => {
       rewardMint,
     });
 
-    await withParsedError(send)(connection, ix, [farmAuthority]);
+    await send(connection, ix, [farmAuthority]);
 
     const farm = findFarmAddress({
       authority: farmAuthority.publicKey,
@@ -135,7 +135,7 @@ describe("staking-program", () => {
       lockConfigs,
     });
 
-    await withParsedError(send)(connection, [ix], [farmAuthority]);
+    await send(connection, [ix], [farmAuthority]);
 
     const locks = (await findFarmLocks(connection, farm)).map((acc) =>
       acc.toJSON()
@@ -159,7 +159,7 @@ describe("staking-program", () => {
       amount: new BN(100_000e9),
     });
 
-    await withParsedError(send)(connection, [ix], [farmAuthority]);
+    await send(connection, [ix], [farmAuthority]);
 
     const farmAccount = await Farm.fetch(connection, farm);
 
@@ -192,7 +192,7 @@ describe("staking-program", () => {
         whitelistType: new WhitelistType.Creator(),
       });
 
-    await withParsedError(send)(
+    await send(
       connection,
       [whitelistBuff.ix, whitelistCreator.ix],
       [farmAuthority]
@@ -228,7 +228,7 @@ describe("staking-program", () => {
       whitelistType: new WhitelistType.Mint(),
     });
 
-    await withParsedError(send)(connection, [ix], [farmAuthority]);
+    await send(connection, [ix], [farmAuthority]);
 
     const whitelistProof = findWhitelistProofAddress({
       farm,
@@ -256,7 +256,7 @@ describe("staking-program", () => {
       owner: userWallet.publicKey,
     });
 
-    await withParsedError(send)(connection, [ix], [userWallet]);
+    await send(connection, [ix], [userWallet]);
 
     const farmer = findFarmerAddress({
       farm,
@@ -290,7 +290,7 @@ describe("staking-program", () => {
       args: { amount: new BN(1) },
     });
 
-    await withParsedError(send)(connection, [ix], [userWallet]);
+    await send(connection, [ix], [userWallet]);
 
     const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
 
@@ -336,11 +336,7 @@ describe("staking-program", () => {
       authority: userWallet.publicKey,
     });
 
-    await withParsedError(send)(
-      connection,
-      [stakeNft.ix, ix],
-      [farmAuthority, userWallet]
-    );
+    await send(connection, [stakeNft.ix, ix], [farmAuthority, userWallet]);
 
     const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
     const farmerAccount = await Farmer.fetch(connection, farmer);
@@ -367,11 +363,7 @@ describe("staking-program", () => {
       mint: otherNft,
     });
 
-    await withParsedError(send)(
-      connection,
-      [ix, unstakeOtherNft.ix],
-      [userWallet]
-    );
+    await send(connection, [ix, unstakeOtherNft.ix], [userWallet]);
 
     const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
     const farmerAccount = await Farmer.fetch(connection, farmer);
@@ -396,7 +388,7 @@ describe("staking-program", () => {
       owner: userWallet.publicKey,
     });
 
-    await withParsedError(send)(connection, [ix], [userWallet]);
+    await send(connection, [ix], [userWallet]);
 
     const stakeReceipt = findStakeReceiptAddress({ farmer, mint: nft });
 
@@ -427,7 +419,7 @@ describe("staking-program", () => {
       args: { amount: new BN(5e8) },
     });
 
-    await withParsedError(send)(connection, [ix], [userWallet]);
+    await send(connection, [ix], [userWallet]);
 
     const { totalRewardRate } = await Farmer.fetch(connection, farmer);
     const expectedRewardRate = 5e8 * Math.floor(1 + lock.bonusFactor / 100);
@@ -453,7 +445,7 @@ describe("staking-program", () => {
         args: { amount: new BN(5e8) },
       });
 
-      await withParsedError(send)(connection, [ix], [userWallet]);
+      await send(connection, [ix], [userWallet]);
       assert(false);
     } catch (e) {
       expect(e).to.be.instanceOf(GemStillStaked);
@@ -472,7 +464,7 @@ describe("staking-program", () => {
       addressToRemove: rewardMint,
     });
 
-    await withParsedError(send)(connection, [ix], [farmAuthority]);
+    await send(connection, [ix], [farmAuthority]);
 
     const whitelistProof = findWhitelistProofAddress({
       farm,
@@ -501,7 +493,7 @@ describe("staking-program", () => {
       owner: userWallet.publicKey,
     });
 
-    await withParsedError(send)(connection, [ix], [userWallet]);
+    await send(connection, [ix], [userWallet]);
 
     const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
     const stakeReceipt = findStakeReceiptAddress({ farmer, mint: rewardMint });
@@ -524,7 +516,7 @@ describe("staking-program", () => {
       authority: userWallet.publicKey,
     });
 
-    await withParsedError(send)(connection, [ix], [userWallet]);
+    await send(connection, [ix], [userWallet]);
 
     const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
     const farmerAccount = await Farmer.fetch(connection, farmer);
