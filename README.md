@@ -9,7 +9,7 @@
 
 
 ## TODO:
- - [ ] Update lib so functions just create the instructions.
+ - [x] Update lib so functions just create the instructions.
  - [ ] Add instruction for deleting a manager account.
 
 
