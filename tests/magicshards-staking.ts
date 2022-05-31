@@ -83,6 +83,8 @@ describe("staking-program", () => {
 
   let rewardMint: PublicKey;
 
+  console.log(farmAuthority.publicKey.toString());
+
   before(async () => {
     // Create new fungible token and mint to farmAuthority.
     const { mint } = await createFungibleToken(connection, farmAuthority);
@@ -91,6 +93,8 @@ describe("staking-program", () => {
     await transferToken(connection, mint, farmAuthority, userWallet.publicKey);
 
     rewardMint = mint;
+
+    console.log(mint.toString());
   });
 
   it("should be able to create a new farm.", async () => {
@@ -110,8 +114,8 @@ describe("staking-program", () => {
 
     expect(reward.reserved.toNumber()).to.equal(0);
     expect(reward.available.toNumber()).to.equal(0);
-    expect(reward.mint).to.eql(rewardMint);
-    expect(authority).to.eql(farmAuthority.publicKey);
+    expect(reward.mint.toString()).to.eql(rewardMint.toString());
+    expect(authority.toString()).to.eql(farmAuthority.publicKey.toString());
   });
 
   it("should be able to create new locks for a farm", async () => {
@@ -208,8 +212,10 @@ describe("staking-program", () => {
       whitelistProof
     );
 
-    expect(whitelistProofAccount.farm).to.eql(farm);
-    expect(whitelistProofAccount.whitelistedAddress).to.eql(creatorAddress);
+    expect(whitelistProofAccount.farm.toString()).to.eql(farm.toString());
+    expect(whitelistProofAccount.whitelistedAddress.toString()).to.eql(
+      creatorAddress.toString()
+    );
     expect(whitelistProofAccount.ty.kind).to.equal("Creator");
     expect(whitelistProofAccount.rewardRate.toNumber()).to.equal(100);
   });
@@ -240,8 +246,10 @@ describe("staking-program", () => {
       whitelistProof
     );
 
-    expect(whitelistProofAccount.farm).to.eql(farm);
-    expect(whitelistProofAccount.whitelistedAddress).to.eql(rewardMint);
+    expect(whitelistProofAccount.farm.toString()).to.eql(farm.toString());
+    expect(whitelistProofAccount.whitelistedAddress.toString()).to.eql(
+      rewardMint.toString()
+    );
     expect(whitelistProofAccount.rewardRate.toNumber()).to.equal(1);
   });
 
@@ -270,7 +278,7 @@ describe("staking-program", () => {
 
     expect(totalRewardRate.toNumber()).to.equal(0);
     expect(accruedRewards.toNumber()).to.equal(0);
-    expect(owner).to.eql(userWallet.publicKey);
+    expect(owner.toString()).to.eql(userWallet.publicKey.toString());
   });
 
   it("should be able to stake an NFT", async () => {

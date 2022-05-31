@@ -7,10 +7,10 @@ import { findFarmAddress } from "lib/pda";
 import { findFarmLocks } from "lib/utils";
 
 const farmAuthorityPubKey = new web3.PublicKey(
-  "4cQGWbuQ3WVXaZwPv7JpSNgWR3HWwt2seG8SSrGRYciK"
+  "CBoRBoZxcpyLNhsdASwBBhy7qd3qoHM8CvQUNyKd2vdd"
 );
 const rewardMint = new web3.PublicKey(
-  "7vx6XqXHfV9eGGVU9Amq9XGurxF66Niadd1nhf8H4F3k"
+  "ChsNJV8gzmjb1aGzxFPY8iGEbkDK6CM1ecsJieB85Hpb"
 );
 
 const useStaking = () => {
@@ -60,19 +60,14 @@ const useStaking = () => {
       let additionals = [];
       const ixs = await Promise.all(
         mints.map(async (mint) => {
-          const { ix, additional } = await stakingClient.createStakeInstruction(
-            {
-              farm,
-              mint,
-              lock: lock.address,
-              owner: publicKey,
-              args: { amount: new BN(1) },
-            }
-          );
+          const { ix } = await stakingClient.createStakeInstruction({
+            farm,
+            mint,
+            lock: lock.address,
+            owner: publicKey,
+            args: { amount: new BN(1) },
+          });
 
-          if (additional) {
-            additionals.push(...additional);
-          }
           return ix;
         })
       );
