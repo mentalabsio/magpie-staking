@@ -1,5 +1,6 @@
 {
   "trailngComma": "es5",
   "avoidParens": true,
-  "singleQuote": true
+  "singleQuote": false,
+  "semi": true
 }
