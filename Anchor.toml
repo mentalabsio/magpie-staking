@@ -8,7 +8,7 @@ magicshards_staking = "3LrsNgisAKcHHdqhaea7b34TrhNBFVdT8gt7zBCCBngi"
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "https://psytrbhymqlkfrhudd.dev.genesysgo.net:8899/"
+cluster = "devnet"
 wallet = "~/.config/solana/anchor.json"
 
 [scripts]

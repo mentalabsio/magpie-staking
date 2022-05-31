@@ -1,5 +1,10 @@
 import { BN, utils, web3 } from "@project-serum/anchor";
 import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  Token,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
+import {
   AccountMeta,
   Connection,
   PublicKey,
@@ -356,6 +361,21 @@ export const StakingProgram = (connection: Connection) => {
       owner,
     });
 
+    const additional = [];
+    const ataAccInfo = await connection.getAccountInfo(farmerVault);
+    if (!ataAccInfo) {
+      const createAtaInstruction =
+        Token.createAssociatedTokenAccountInstruction(
+          ASSOCIATED_TOKEN_PROGRAM_ID,
+          TOKEN_PROGRAM_ID,
+          mint,
+          farmer,
+          owner,
+          owner
+        );
+      additional.push(createAtaInstruction);
+    }
+
     const stakeReceipt = findStakeReceiptAddress({ farmer, mint });
 
     const ix = stake(args, {
@@ -380,7 +400,7 @@ export const StakingProgram = (connection: Connection) => {
 
     foundMetadata && ix.keys.push(metadata);
 
-    return { ix };
+    return { ix, additional };
   };
 
   const createClaimRewardsInstruction = async ({
