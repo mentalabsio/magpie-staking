@@ -12,8 +12,10 @@ import useWalletNFTs, { NFT } from "@/hooks/useWalletNFTs";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import NFTSelectInput from "@/components/NFTSelectInput/NFTSelectInput";
 import { LoadingIcon } from "@/components/icons/LoadingIcon";
+import useStaking from "@/hooks/useStaking";
 
 export default function Home() {
+  const { initFarmer, stakeAll } = useStaking();
   const { walletNFTs, fetchNFTs } = useWalletNFTs([
     "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs",
   ]);
@@ -108,6 +110,7 @@ export default function Home() {
           Staking
         </Heading>
         <Text>Stake now</Text>
+        <Button onClick={initFarmer}>Init farmer</Button>
 
         <Flex
           my="3.2rem"
@@ -229,7 +232,7 @@ export default function Home() {
                 }}
                 onClick={async (e) => {
                   const allMints = selectedWalletItems.map((item) => item.mint);
-                  // await stakeAll(allMints);
+                  await stakeAll(allMints);
                   await fetchNFTs();
                   // await fetchProgress();
                 }}
