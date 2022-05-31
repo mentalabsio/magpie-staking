@@ -1,17 +1,17 @@
-import { Theme } from "theme-ui"
+import { Theme } from "theme-ui";
 
-import base from "./preset-base"
-import { reactTabsStyles } from "./react-tabs"
+import base from "./preset-base";
+import { reactTabsStyles } from "./react-tabs";
 
 export const getGradient = (rgb: string) => {
   /**
    * Split RGB. Example: rgb(226, 217, 211)
    * Then extract only numbers
    */
-  const splitted = rgb.split(",").map((raw) => raw.replace(/\D/g, ""))
+  const splitted = rgb.split(",").map((raw) => raw.replace(/\D/g, ""));
 
-  return `linear-gradient(225deg, ${rgb} 0%, rgba(${splitted[0]}, ${splitted[1]}, ${splitted[2]}, 0.7) 50%, rgba(${splitted[0]}, ${splitted[1]}, ${splitted[2]}, 0.5) 100%)`
-}
+  return `linear-gradient(225deg, ${rgb} 0%, rgba(${splitted[0]}, ${splitted[1]}, ${splitted[2]}, 0.7) 50%, rgba(${splitted[0]}, ${splitted[1]}, ${splitted[2]}, 0.5) 100%)`;
+};
 
 /**
  * rgb(84, 42, 147)
@@ -277,6 +277,6 @@ const theme: Theme = {
       size: "1.2rem!important",
     },
   },
-}
+};
 
-export default theme
+export default theme;

@@ -33,9 +33,15 @@ const SelectorNFTOptionLabel = ({
 const NFTSelectInput = ({
   name,
   NFTs = null,
+  value = null,
+  onChange = null,
+  label = "Select an NFT",
 }: {
   name: string
   NFTs: NFT[]
+  value?: string | number
+  onChange?: (newValue: { value: unknown; label: React.ReactElement }) => any
+  label?: string
 }) => {
   const { publicKey } = useWallet()
   const { theme } = useThemeUI()
@@ -43,7 +49,7 @@ const NFTSelectInput = ({
   const options =
     NFTs &&
     NFTs.map((NFT) => ({
-      value: NFT.mint,
+      value: NFT.mint.toString(),
       label: (
         <SelectorNFTOptionLabel
           imgSrc={NFT.externalMetadata.image}
@@ -101,6 +107,10 @@ const NFTSelectInput = ({
   return (
     <Select
       key={"nftselect-" + options?.length}
+      {...(value
+        ? { value: options.filter((option) => option.value === value) }
+        : {})}
+      {...(onChange ? { onChange } : {})}
       name={name}
       options={options || []}
       styles={colourStyles}
@@ -109,7 +119,7 @@ const NFTSelectInput = ({
           name={
             publicKey
               ? NFTs
-                ? "Select an NFT"
+                ? label
                 : "Loading NFTs..."
               : "Connect your wallet."
           }

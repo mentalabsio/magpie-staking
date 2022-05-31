@@ -1,13 +1,13 @@
 /** @jsxImportSource theme-ui */
-import Link from "next/link"
-import { Button, Container, Flex, Text } from "@theme-ui/components"
+import Link from "next/link";
+import { Button, Container, Flex, Text } from "@theme-ui/components";
 
-import WalletManager from "@/components/WalletManager/WalletManager"
-import { useState } from "react"
-import { CloseIcon, MenuIcon } from "../icons"
+import WalletManager from "@/components/WalletManager/WalletManager";
+import { useState } from "react";
+import { CloseIcon, MenuIcon } from "../icons";
 
 const Header = () => {
-  const [isMobileMenuActive, setIsMobileMenuActive] = useState(false)
+  const [isMobileMenuActive, setIsMobileMenuActive] = useState(false);
 
   return (
     <Flex
@@ -15,8 +15,9 @@ const Header = () => {
         position: "sticky",
         top: 0,
         zIndex: 9,
-        background: (theme) => theme.colors?.backgroundGradient,
+        background: (theme) => theme.colors.backgroundGradient,
         borderBottom: "1px solid",
+        backdropFilter: "blur(5px)",
         borderColor: "background2",
       }}
     >
@@ -30,23 +31,17 @@ const Header = () => {
           }}
         >
           <Link href="/" passHref>
-            <Flex as="a" sx={{ alignItems: "center", flexDirection: "column" }}>
-              <Flex sx={{ alignItems: "center" }}>
-                <Text as="h1" variant="headingSpecial" ml=".4rem">
-                  Solana Web App
-                </Text>
-              </Flex>
+            <Flex
+              as="a"
+              sx={{
+                alignItems: "center",
+                flexDirection: "column",
+                padding: "1.6rem 0",
+              }}
+            >
+              <Flex sx={{ alignItems: "center" }}>Staking</Flex>
             </Flex>
           </Link>
-          <Text
-            variant="small"
-            sx={{
-              marginRight: "auto",
-            }}
-          >
-            &nbsp;&nbsp;&nbsp;&#8226;&nbsp;
-            {process.env.NEXT_PUBLIC_CONNECTION_NETWORK}
-          </Text>
 
           <Flex
             as="nav"
@@ -130,7 +125,7 @@ const Header = () => {
         </Flex>
       </Container>
     </Flex>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

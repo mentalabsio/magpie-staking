@@ -37,15 +37,16 @@ const useWalletNFTs = (creators: string[] = []) => {
     console.log("[useWalletNFTs] Fetching NFTs...")
     const NFTs = await getNFTsByOwner(publicKey, connection)
 
-    const filtered = creators
-      ? NFTs.filter((NFT) => {
-          const obj = NFT.onchainMetadata?.data?.creators?.find((value) => {
-            return creators.indexOf(value.address) !== -1
-          })
+    const filtered =
+      creators && creators?.length
+        ? NFTs.filter((NFT) => {
+            const obj = NFT.onchainMetadata?.data?.creators?.find((value) => {
+              return creators.indexOf(value.address) !== -1
+            })
 
-          return obj
-        })
-      : NFTs
+            return obj
+          })
+        : NFTs
 
     setWalletNFTs(filtered)
   }, [connection, publicKey])

@@ -47,6 +47,7 @@ const CollectionItem = (props: Props) => {
         transition: "all .125s linear",
         outline: "none",
         cursor: onClick ? "pointer" : "auto",
+        maxWidth: "16rem",
 
         "&:hover, &:focus, > .toggle-menu:focus": {
           "> .toggle-menu": {

@@ -75,7 +75,7 @@ export const MenuIcon = () => {
   return (
     <svg
       sx={{
-        stroke: "text",
+        stroke: "background",
       }}
       xmlns="http://www.w3.org/2000/svg"
       width="24"
