@@ -4,9 +4,9 @@ import { Transaction } from "@solana/web3.js";
 import { StakingProgram } from "lib";
 import { StakeReceipt } from "lib/gen/accounts";
 import { fromTxError } from "lib/gen/errors";
-import { findFarmAddress } from "lib/pda";
+import { findFarmAddress, findFarmerAddress } from "lib/pda";
 import { findFarmLocks, findUserStakeReceipts } from "lib/utils";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getNFTMetadata } from "utils/nfts";
 import { NFT } from "./useWalletNFTs";
 
@@ -29,8 +29,8 @@ const useStaking = () => {
     StakeReceiptWithMetadata[] | null
   >(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchReceipts = useCallback(async () => {
+    if (publicKey) {
       const farm = findFarmAddress({
         authority: farmAuthorityPubKey,
         rewardMint,
@@ -56,10 +56,12 @@ const useStaking = () => {
       );
 
       setStakeReceipts(withMetadatas);
-    };
+    }
+  }, [publicKey]);
 
+  useEffect(() => {
     if (publicKey) {
-      fetchData();
+      fetchReceipts();
     }
   }, [publicKey]);
 
@@ -141,7 +143,34 @@ const useStaking = () => {
     }
   };
 
-  return { initFarmer, stakeAll, stakeReceipts };
+  const unstake = async (mint: web3.PublicKey) => {
+    const farm = findFarmAddress({
+      authority: farmAuthorityPubKey,
+      rewardMint,
+    });
+
+    const stakingClient = StakingProgram(connection);
+
+    const { ix } = await stakingClient.createUnstakeInstruction({
+      farm,
+      mint,
+      owner: publicKey,
+    });
+
+    const tx = new Transaction();
+
+    tx.add(ix);
+
+    const latest = await connection.getLatestBlockhash();
+    tx.recentBlockhash = latest.blockhash;
+    tx.feePayer = publicKey;
+
+    const txid = await sendTransaction(tx, connection);
+
+    await connection.confirmTransaction(txid);
+  };
+
+  return { initFarmer, stakeAll, stakeReceipts, unstake, fetchReceipts };
 };
 
 export default useStaking;

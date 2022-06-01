@@ -15,15 +15,12 @@ import { LoadingIcon } from "@/components/icons/LoadingIcon";
 import useStaking from "@/hooks/useStaking";
 
 export default function Home() {
-  const { initFarmer, stakeAll, stakeReceipts } = useStaking();
+  const { initFarmer, stakeAll, stakeReceipts, unstake, fetchReceipts } =
+    useStaking();
   const { walletNFTs, fetchNFTs } = useWalletNFTs([
     "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs",
   ]);
-  const { walletNFTs: associatedNFTs, fetchNFTs: fetchAssociatedNFTs } =
-    useWalletNFTs(["62vz2oMLFf6k4DcX23tA6hR4ixDGUVxqk4gJf7iCGiEx"]);
-  const [isAddingAssociated, setIsAddingAssociated] = useState<false | string>(
-    false
-  );
+
   const [selectedWalletItems, setSelectedWalletItems] = useState<NFT[]>([]);
 
   const handleAssociatedFormSubmit = async (e) => {
@@ -234,7 +231,7 @@ export default function Home() {
                   const allMints = selectedWalletItems.map((item) => item.mint);
                   await stakeAll(allMints);
                   await fetchNFTs();
-                  // await fetchProgress();
+                  await fetchReceipts();
                 }}
                 disabled={!selectedWalletItems.length}
               >
@@ -270,7 +267,14 @@ export default function Home() {
               >
                 {stakeReceipts
                   ? stakeReceipts.map((receipt) => (
-                      <CollectionItem item={receipt.metadata} />
+                      <CollectionItem
+                        item={receipt.metadata}
+                        onClick={async () => {
+                          await unstake(receipt.mint);
+                          await fetchNFTs();
+                          await fetchReceipts();
+                        }}
+                      />
                     ))
                   : null}
                 {/* {progress &&
