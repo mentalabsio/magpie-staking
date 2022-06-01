@@ -15,8 +15,14 @@ import { LoadingIcon } from "@/components/icons/LoadingIcon";
 import useStaking from "@/hooks/useStaking";
 
 export default function Home() {
-  const { initFarmer, stakeAll, stakeReceipts, unstake, fetchReceipts } =
-    useStaking();
+  const {
+    initFarmer,
+    stakeAll,
+    stakeReceipts,
+    feedbackStatus,
+    unstake,
+    fetchReceipts,
+  } = useStaking();
   const { walletNFTs, fetchNFTs } = useWalletNFTs([
     "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs",
   ]);
@@ -142,7 +148,7 @@ export default function Home() {
               margin: ".8rem 0",
             }}
           >
-            {/* {feedbackStatus ? (
+            {feedbackStatus ? (
               <>
                 {feedbackStatus.indexOf("Success") === -1 ? (
                   <LoadingIcon size="1.6rem" />
@@ -162,7 +168,7 @@ export default function Home() {
               </>
             ) : (
               ""
-            )} */}
+            )}
             &nbsp;
           </Flex>
         </Flex>

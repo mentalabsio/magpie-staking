@@ -24,6 +24,7 @@ type StakeReceiptWithMetadata = StakeReceipt & {
 const useStaking = () => {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
+  const [feedbackStatus, setFeedbackStatus] = useState("");
 
   const [stakeReceipts, setStakeReceipts] = useState<
     StakeReceiptWithMetadata[] | null
@@ -36,12 +37,14 @@ const useStaking = () => {
         rewardMint,
       });
 
+      setFeedbackStatus("Fetching receipts...");
       const receipts = await findUserStakeReceipts(connection, farm, publicKey);
 
       const stakingReceipts = receipts.filter(
         (receipt) => receipt.endTs === null
       );
 
+      setFeedbackStatus("Fetching metadatas...");
       const withMetadatas = await Promise.all(
         stakingReceipts.map(async (receipt) => {
           const metadata = await getNFTMetadata(
@@ -56,6 +59,7 @@ const useStaking = () => {
       );
 
       setStakeReceipts(withMetadatas);
+      setFeedbackStatus("");
     }
   }, [publicKey]);
 
@@ -73,6 +77,7 @@ const useStaking = () => {
       rewardMint,
     });
 
+    setFeedbackStatus("Initializing transaction...");
     const { ix } = await stakingClient.createInitializeFarmerInstruction({
       farm,
       owner: publicKey,
@@ -86,6 +91,7 @@ const useStaking = () => {
     tx.recentBlockhash = latest.blockhash;
     tx.feePayer = publicKey;
 
+    setFeedbackStatus("Awaiting approval...");
     const txid = await sendTransaction(tx, connection);
 
     await connection.confirmTransaction(txid);
@@ -100,6 +106,7 @@ const useStaking = () => {
         rewardMint,
       });
 
+      setFeedbackStatus("Initializing...");
       const locks = await findFarmLocks(connection, farm);
       const lock = locks.find((lock) => lock.bonusFactor === 0);
 
@@ -128,8 +135,10 @@ const useStaking = () => {
       tx.recentBlockhash = latest.blockhash;
       tx.feePayer = publicKey;
 
+      setFeedbackStatus("Awaiting approval...");
       const txid = await sendTransaction(tx, connection);
 
+      setFeedbackStatus("Confirming...");
       await connection.confirmTransaction(txid);
 
       console.log(txid);
@@ -151,6 +160,8 @@ const useStaking = () => {
 
     const stakingClient = StakingProgram(connection);
 
+    setFeedbackStatus("Initializing...");
+
     const { ix } = await stakingClient.createUnstakeInstruction({
       farm,
       mint,
@@ -160,17 +171,27 @@ const useStaking = () => {
     const tx = new Transaction();
 
     tx.add(ix);
-
     const latest = await connection.getLatestBlockhash();
     tx.recentBlockhash = latest.blockhash;
     tx.feePayer = publicKey;
 
+    setFeedbackStatus("Awaiting approval...");
+
     const txid = await sendTransaction(tx, connection);
+
+    setFeedbackStatus("Confirming...");
 
     await connection.confirmTransaction(txid);
   };
 
-  return { initFarmer, stakeAll, stakeReceipts, unstake, fetchReceipts };
+  return {
+    feedbackStatus,
+    initFarmer,
+    stakeAll,
+    stakeReceipts,
+    unstake,
+    fetchReceipts,
+  };
 };
 
 export default useStaking;
