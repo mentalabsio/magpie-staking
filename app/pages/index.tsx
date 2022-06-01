@@ -2,7 +2,7 @@
 import Head from "next/head";
 
 import { Button, Flex, Heading, Text } from "@theme-ui/components";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { web3 } from "@project-serum/anchor";
 
 import Header from "@/components/Header/Header";
@@ -22,9 +22,14 @@ export default function Home() {
     feedbackStatus,
     unstake,
     fetchReceipts,
+    buffPair,
   } = useStaking();
   const { walletNFTs, fetchNFTs } = useWalletNFTs([
     "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs",
+  ]);
+
+  const { walletNFTs: bufferNFTs, fetchNFTs: fetchBufferNFTs } = useWalletNFTs([
+    "62vz2oMLFf6k4DcX23tA6hR4ixDGUVxqk4gJf7iCGiEx",
   ]);
 
   const [selectedWalletItems, setSelectedWalletItems] = useState<NFT[]>([]);
@@ -63,6 +68,21 @@ export default function Home() {
 
       return prev?.concat(item);
     });
+  };
+
+  const handleBuffFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const data = new FormData(e.currentTarget);
+
+    const toBuff = data.getAll("to_buff");
+    const buffer = data.get("buffer_mint");
+
+    await buffPair(
+      new web3.PublicKey(toBuff[0]),
+      new web3.PublicKey(toBuff[1]),
+      new web3.PublicKey(buffer)
+    );
   };
 
   return (
@@ -271,18 +291,51 @@ export default function Home() {
                   gap: "3.2rem",
                 }}
               >
-                {stakeReceipts
-                  ? stakeReceipts.map((receipt) => (
-                      <CollectionItem
-                        item={receipt.metadata}
-                        onClick={async () => {
-                          await unstake(receipt.mint);
-                          await fetchNFTs();
-                          await fetchReceipts();
-                        }}
-                      />
-                    ))
-                  : null}
+                <NFTGallery
+                  NFTs={stakeReceipts?.map((receipt) => receipt.metadata)}
+                >
+                  <>
+                    {stakeReceipts
+                      ? stakeReceipts.map((receipt) => (
+                          <CollectionItem
+                            item={receipt.metadata}
+                            onClick={async () => {
+                              await unstake(receipt.mint);
+                              await fetchNFTs();
+                              await fetchReceipts();
+                            }}
+                            sx={{
+                              border: "1px solid",
+                              borderColor: receipt.buff
+                                ? "yellow"
+                                : "transparent",
+                            }}
+                          />
+                        ))
+                      : null}
+                  </>
+                </NFTGallery>
+                <form
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1.6rem",
+                  }}
+                  onSubmit={handleBuffFormSubmit}
+                >
+                  <NFTSelectInput
+                    NFTs={stakeReceipts?.map((receipt) => receipt.metadata)}
+                    name="to_buff"
+                  />
+                  <NFTSelectInput
+                    NFTs={stakeReceipts?.map((receipt) => receipt.metadata)}
+                    name="to_buff"
+                  />
+                  <NFTSelectInput NFTs={bufferNFTs} name="buffer_mint" />
+                  <Button type="submit" variant="secondary">
+                    Buff an NFT pair!
+                  </Button>
+                </form>
                 {/* {progress &&
                   progress.stakes.map((stake) => {
                     const isAdding =
