@@ -69,8 +69,9 @@ describe("staking-program", () => {
 
   // NFT that will be used as a buff.
   const buffCreator = new PublicKey(
-    "J1E9xvBsE8gwfV8qXVxbQ6H2wfEEKjRaxS2ENiZm4h2D"
+    "62vz2oMLFf6k4DcX23tA6hR4ixDGUVxqk4gJf7iCGiEx"
   );
+
   const buffMint = new PublicKey(
     "Cfm3x9CXn1jDJK2k67h3KiDMWSxerKCqf4ZHZF9ydPq2"
   );

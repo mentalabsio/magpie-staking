@@ -12,7 +12,7 @@ import useWalletNFTs, { NFT } from "@/hooks/useWalletNFTs";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import NFTSelectInput from "@/components/NFTSelectInput/NFTSelectInput";
 import { LoadingIcon } from "@/components/icons/LoadingIcon";
-import useStaking from "@/hooks/useStaking";
+import useStaking, { StakeReceiptWithMetadata } from "@/hooks/useStaking";
 
 export default function Home() {
   const {
@@ -23,6 +23,7 @@ export default function Home() {
     unstake,
     fetchReceipts,
     buffPair,
+    debuffPair,
   } = useStaking();
   const { walletNFTs, fetchNFTs } = useWalletNFTs([
     "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs",
@@ -83,7 +84,41 @@ export default function Home() {
       new web3.PublicKey(toBuff[1]),
       new web3.PublicKey(buffer)
     );
+
+    await fetchNFTs();
+    await fetchReceipts();
+    await fetchBufferNFTs();
   };
+
+  const reducedReceipts: {
+    buffed: {
+      [key: string]: StakeReceiptWithMetadata[];
+    };
+    notBuffed: StakeReceiptWithMetadata[];
+  } = stakeReceipts?.reduce(
+    (acc, curr) => {
+      const buffer = curr.buff;
+
+      if (!buffer) {
+        acc.notBuffed.push(curr);
+
+        return acc;
+      }
+
+      const currentArray = acc.buffed[buffer?.key.toString()];
+
+      if (currentArray) {
+        currentArray.push(curr);
+      } else {
+        acc.buffed[buffer.key.toString()] = [curr];
+      }
+
+      return acc;
+    },
+    { buffed: {}, notBuffed: [] }
+  );
+
+  console.log(reducedReceipts);
 
   return (
     <>
@@ -291,12 +326,22 @@ export default function Home() {
                   gap: "3.2rem",
                 }}
               >
-                <NFTGallery
-                  NFTs={stakeReceipts?.map((receipt) => receipt.metadata)}
-                >
-                  <>
-                    {stakeReceipts
-                      ? stakeReceipts.map((receipt) => (
+                <>
+                  Normals:
+                  <div
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "1.6rem",
+                      alignItems: "center",
+
+                      "@media (min-width: 768px)": {
+                        gridTemplateColumns: "1fr 1fr 1fr 1fr",
+                      },
+                    }}
+                  >
+                    {reducedReceipts
+                      ? reducedReceipts.notBuffed.map((receipt) => (
                           <CollectionItem
                             item={receipt.metadata}
                             onClick={async () => {
@@ -313,8 +358,63 @@ export default function Home() {
                           />
                         ))
                       : null}
-                  </>
-                </NFTGallery>
+                  </div>
+                  Pairs:
+                  {reducedReceipts
+                    ? Object.entries(reducedReceipts.buffed).map(
+                        ([key, value]) => {
+                          return (
+                            <Flex>
+                              <CollectionItem
+                                item={value[0].metadata}
+                                onClick={async () => {
+                                  await unstake(value[0].mint);
+                                  await fetchNFTs();
+                                  await fetchReceipts();
+                                }}
+                                sx={{
+                                  border: "1px solid",
+                                  borderColor: value[0].buff
+                                    ? "yellow"
+                                    : "transparent",
+                                }}
+                              />
+
+                              <CollectionItem
+                                item={value[1].metadata}
+                                onClick={async () => {
+                                  await unstake(value[1].mint);
+                                  await fetchNFTs();
+                                  await fetchReceipts();
+                                }}
+                                sx={{
+                                  border: "1px solid",
+                                  borderColor: value[1].buff
+                                    ? "yellow"
+                                    : "transparent",
+                                }}
+                              />
+                              <Button
+                                variant="secondary"
+                                onClick={async () => {
+                                  await debuffPair(
+                                    value[0].mint,
+                                    value[1].mint,
+                                    new web3.PublicKey(key)
+                                  );
+                                  await fetchNFTs();
+                                  await fetchReceipts();
+                                  await fetchBufferNFTs();
+                                }}
+                              >
+                                Debuff pair
+                              </Button>
+                            </Flex>
+                          );
+                        }
+                      )
+                    : null}
+                </>
                 <form
                   sx={{
                     display: "flex",

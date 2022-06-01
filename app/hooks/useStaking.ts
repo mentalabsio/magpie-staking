@@ -17,7 +17,7 @@ const rewardMint = new web3.PublicKey(
   "HAasJiLpJzUJt198aPWTTQePmcobUndJ7TFe419tG3wf"
 );
 
-type StakeReceiptWithMetadata = StakeReceipt & {
+export type StakeReceiptWithMetadata = StakeReceipt & {
   metadata: NFT;
 };
 
@@ -221,6 +221,43 @@ const useStaking = () => {
     setFeedbackStatus("Success!");
   };
 
+  const debuffPair = async (
+    nftA: web3.PublicKey,
+    nftB: web3.PublicKey,
+    buffMint: web3.PublicKey
+  ) => {
+    const farm = findFarmAddress({
+      authority: farmAuthorityPubKey,
+      rewardMint,
+    });
+
+    const stakingClient = StakingProgram(connection);
+
+    const { ix } = await stakingClient.createDebuffPairInstruction({
+      farm,
+      buffMint,
+      pair: [nftA, nftB],
+      authority: publicKey,
+    });
+
+    const tx = new Transaction();
+
+    tx.add(ix);
+    const latest = await connection.getLatestBlockhash();
+    tx.recentBlockhash = latest.blockhash;
+    tx.feePayer = publicKey;
+
+    setFeedbackStatus("Awaiting approval...");
+
+    const txid = await sendTransaction(tx, connection);
+
+    setFeedbackStatus("Confirming...");
+
+    await connection.confirmTransaction(txid);
+
+    setFeedbackStatus("Success!");
+  };
+
   return {
     feedbackStatus,
     initFarmer,
@@ -229,6 +266,7 @@ const useStaking = () => {
     unstake,
     fetchReceipts,
     buffPair,
+    debuffPair,
   };
 };
 
