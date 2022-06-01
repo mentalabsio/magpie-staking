@@ -361,21 +361,6 @@ export const StakingProgram = (connection: Connection) => {
       owner,
     });
 
-    const additional = [];
-    const ataAccInfo = await connection.getAccountInfo(farmerVault);
-    if (!ataAccInfo) {
-      const createAtaInstruction =
-        Token.createAssociatedTokenAccountInstruction(
-          ASSOCIATED_TOKEN_PROGRAM_ID,
-          TOKEN_PROGRAM_ID,
-          mint,
-          farmer,
-          owner,
-          owner
-        );
-      additional.push(createAtaInstruction);
-    }
-
     const stakeReceipt = findStakeReceiptAddress({ farmer, mint });
 
     const ix = stake(args, {
@@ -400,7 +385,7 @@ export const StakingProgram = (connection: Connection) => {
 
     foundMetadata && ix.keys.push(metadata);
 
-    return { ix, additional };
+    return { ix };
   };
 
   const createClaimRewardsInstruction = async ({

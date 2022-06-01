@@ -15,7 +15,7 @@ import { LoadingIcon } from "@/components/icons/LoadingIcon";
 import useStaking from "@/hooks/useStaking";
 
 export default function Home() {
-  const { initFarmer, stakeAll } = useStaking();
+  const { initFarmer, stakeAll, stakeReceipts } = useStaking();
   const { walletNFTs, fetchNFTs } = useWalletNFTs([
     "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs",
   ]);
@@ -268,6 +268,11 @@ export default function Home() {
                   gap: "3.2rem",
                 }}
               >
+                {stakeReceipts
+                  ? stakeReceipts.map((receipt) => (
+                      <CollectionItem item={receipt.metadata} />
+                    ))
+                  : null}
                 {/* {progress &&
                   progress.stakes.map((stake) => {
                     const isAdding =

@@ -5,9 +5,10 @@ import {
 import { web3, utils } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 
-import { Lock } from "./gen/accounts";
+import { Lock, StakeReceipt } from "./gen/accounts";
 import { fromTxError } from "./gen/errors";
 import { PROGRAM_ID } from "./gen/programId";
+import { findFarmerAddress } from "./pda";
 
 type ProgramAccounts = {
   pubkey: web3.PublicKey;
@@ -32,6 +33,27 @@ export const findFarmLocks = async (
   return Promise.all(
     accounts.map(async ({ pubkey, account }) => {
       return Object.assign(Lock.decode(account.data), { address: pubkey });
+    })
+  );
+};
+
+export const findUserStakeReceipts = async (
+  connection: web3.Connection,
+  farm: web3.PublicKey,
+  userPublicKey: web3.PublicKey
+): Promise<StakeReceipt[]> => {
+  const farmer = findFarmerAddress({ farm, owner: userPublicKey });
+
+  const filters = [
+    accountFilter(StakeReceipt.discriminator),
+    memcmp(8, farmer.toString()),
+  ];
+
+  const accounts = await fetchAccounts(connection, filters);
+
+  return Promise.all(
+    accounts.map(async (account) => {
+      return StakeReceipt.decode(account.account.data);
     })
   );
 };
