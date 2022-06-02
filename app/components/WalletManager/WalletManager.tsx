@@ -29,7 +29,7 @@ const WalletManager = () => {
             sx={{
               backgroundColor: "unset",
               transition: "all .3s linear",
-              color: "text",
+              color: "background",
               lineHeight: "body",
               fontSize: "1.4rem",
               padding: "0",
@@ -48,7 +48,7 @@ const WalletManager = () => {
           <WalletMultiButton
             sx={{
               backgroundColor: "unset",
-              color: "text",
+              color: "background",
               lineHeight: "body",
               fontSize: "1.4rem",
               padding: ".8rem 1.6rem",

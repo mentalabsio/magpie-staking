@@ -15,7 +15,7 @@ export const getGradient = (rgb: string) => {
 
 /**
  * rgb(84, 42, 147)
- * rgb(162, 0, 84)
+ * rgb(254, 223, 99)
  *
  */
 
@@ -24,8 +24,8 @@ const theme: Theme = {
   colors: {
     background: "rgb(24, 19, 19)",
     text: "rgb(226, 217, 211)",
-    primary: "rgb(162, 0, 84)",
-    primaryGradient: getGradient("rgb(162, 0, 84)"),
+    primary: "rgb(254, 223, 99)",
+    primaryGradient: getGradient("rgb(254, 223, 99)"),
     heading: "rgb(226, 217, 211)",
     background2: "#1E1E24",
     backgroundGradient: getGradient("rgb(24, 19, 19)"),
@@ -33,8 +33,8 @@ const theme: Theme = {
     //   light: {
     //     background: "rgb(226, 217, 211)",
     //     text: "rgb(24, 19, 19)",
-    //     primary: "rgb(162, 0, 84)",
-    //     primaryGradient: getGradient("rgb(162, 0, 84)"),
+    //     primary: "rgb(254, 223, 99)",
+    //     primaryGradient: getGradient("rgb(254, 223, 99)"),
     //     heading: "#1E1E24",
     //     background2: "#1E1E24",
     //     backgroundGradient: getGradient("rgb(226, 217, 211)")
@@ -59,7 +59,7 @@ const theme: Theme = {
   buttons: {
     primary: {
       display: "flex",
-      color: "heading",
+      color: "background",
       background: (theme) => theme.colors?.primaryGradient,
       border: "1px solid transparent",
       transition: "all .125s linear",
@@ -82,7 +82,7 @@ const theme: Theme = {
     },
     secondary: {
       display: "flex",
-      color: "heading",
+      color: "text",
       background: (theme) => theme.colors?.backgroundGradient,
       border: "1px solid transparent",
       transition: "all .125s linear",
@@ -106,10 +106,10 @@ const theme: Theme = {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      color: "heading",
+      color: "background",
       transform: "perspective(1px) translateZ(0)",
       position: "relative",
-      background: "linear-gradient(45deg, rgb(162, 0, 84), grey)",
+      background: "linear-gradient(45deg, rgb(254, 223, 99), grey)",
       borderRadius: ".4rem",
       boxShadow: "0 0 5px 2px #00000054",
       fontSize: "1.6rem",
@@ -120,7 +120,7 @@ const theme: Theme = {
       transition: "all .125s linear",
 
       "&:not(:disabled):hover": {
-        background: "linear-gradient(225deg, rgb(162, 0, 84), grey)",
+        background: "linear-gradient(225deg, rgb(254, 223, 99), grey)",
         cursor: "pointer",
       },
 
@@ -224,7 +224,7 @@ const theme: Theme = {
         lineHeight: 1.45,
         minHeight: "100vh",
         color: "text",
-        backgroundColor: "background",
+        backgroundColor: (theme) => theme.colors.backgroundGradient,
         transition: "all .125s linear",
       },
 
