@@ -2,7 +2,7 @@ import { web3, BN } from "@project-serum/anchor";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { StakingProgram } from "lib";
-import { StakeReceipt } from "lib/gen/accounts";
+import { Farmer, StakeReceipt } from "lib/gen/accounts";
 import { fromTxError } from "lib/gen/errors";
 import { findFarmAddress, findFarmerAddress } from "lib/pda";
 import { findFarmLocks, findUserStakeReceipts } from "lib/utils";
@@ -13,6 +13,7 @@ import { NFT } from "./useWalletNFTs";
 const farmAuthorityPubKey = new web3.PublicKey(
   "2EywcPUJFn9g7FjoVezsTMdX4ah7SHRmqyf6qXSNv9TL"
 );
+
 const rewardMint = new web3.PublicKey(
   "HAasJiLpJzUJt198aPWTTQePmcobUndJ7TFe419tG3wf"
 );
@@ -25,6 +26,9 @@ const useStaking = () => {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
   const [feedbackStatus, setFeedbackStatus] = useState("");
+  const [farmerAccount, setFarmerAccount] = useState<Farmer | false | null>(
+    null
+  );
 
   const [stakeReceipts, setStakeReceipts] = useState<
     StakeReceiptWithMetadata[] | null
@@ -64,7 +68,26 @@ const useStaking = () => {
   }, [publicKey]);
 
   useEffect(() => {
+    const fetchFarmer = async () => {
+      const farm = findFarmAddress({
+        authority: farmAuthorityPubKey,
+        rewardMint,
+      });
+
+      const farmer = findFarmerAddress({ farm, owner: publicKey });
+      const farmerAccount = await Farmer.fetch(connection, farmer);
+
+      if (!farmerAccount) {
+        setFarmerAccount(false);
+
+        return true;
+      }
+
+      setFarmerAccount(farmerAccount);
+    };
+
     if (publicKey) {
+      fetchFarmer();
       fetchReceipts();
     }
   }, [publicKey]);
@@ -259,6 +282,7 @@ const useStaking = () => {
   };
 
   return {
+    farmerAccount,
     feedbackStatus,
     initFarmer,
     stakeAll,

@@ -16,6 +16,7 @@ import useStaking, { StakeReceiptWithMetadata } from "@/hooks/useStaking";
 
 export default function Home() {
   const {
+    farmerAccount,
     initFarmer,
     stakeAll,
     stakeReceipts,
@@ -168,7 +169,9 @@ export default function Home() {
           Staking
         </Heading>
         <Text>Stake now</Text>
-        <Button onClick={initFarmer}>Init farmer</Button>
+        {farmerAccount === false ? (
+          <Button onClick={initFarmer}>Init farmer</Button>
+        ) : null}
 
         <Flex
           my="3.2rem"
