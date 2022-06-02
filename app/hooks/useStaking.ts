@@ -285,9 +285,40 @@ const useStaking = () => {
     setFeedbackStatus("Success!");
   };
 
+  const claim = async () => {
+    const farm = findFarmAddress({
+      authority: farmAuthorityPubKey,
+      rewardMint,
+    });
+    const stakingClient = StakingProgram(connection);
+
+    const { ix } = await stakingClient.createClaimRewardsInstruction({
+      farm,
+      authority: publicKey,
+    });
+
+    const tx = new Transaction();
+
+    tx.add(ix);
+    const latest = await connection.getLatestBlockhash();
+    tx.recentBlockhash = latest.blockhash;
+    tx.feePayer = publicKey;
+
+    setFeedbackStatus("Awaiting approval...");
+
+    const txid = await sendTransaction(tx, connection);
+
+    setFeedbackStatus("Confirming...");
+
+    await connection.confirmTransaction(txid);
+
+    setFeedbackStatus("Success!");
+  };
+
   return {
     farmerAccount,
     feedbackStatus,
+    claim,
     initFarmer,
     stakeAll,
     stakeReceipts,

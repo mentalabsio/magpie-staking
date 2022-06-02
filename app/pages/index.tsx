@@ -19,6 +19,7 @@ export default function Home() {
     farmerAccount,
     initFarmer,
     stakeAll,
+    claim,
     stakeReceipts,
     feedbackStatus,
     unstake,
@@ -147,10 +148,29 @@ export default function Home() {
           padding: "0 1.6rem",
         }}
       >
-        <Heading mb=".8rem" variant="heading1">
-          Staking
+        <Heading
+          sx={{
+            position: "relative",
+            fontSize: "6.4rem",
+            lineHeight: 0.5,
+            fontFamily: "Funghetto, sans-serif",
+            marginTop: "3.2rem",
+          }}
+          mb=".8rem"
+          variant="heading1"
+        >
+          NFTabs
         </Heading>
-        <Text>Stake now</Text>
+        <Text
+          sx={{
+            position: "relative",
+            marginBottom: "3.2rem",
+            fontSize: "3.2rem",
+            fontFamily: "Funghetto, sans-serif",
+          }}
+        >
+          Staking
+        </Text>
         {farmerAccount === false ? (
           <Button mt="3.2rem" onClick={initFarmer}>
             Init farmer
@@ -172,7 +192,7 @@ export default function Home() {
                   gap: "1.6rem",
                 }}
               ></Flex>
-              <Button>Claim all</Button>
+              <Button onClick={claim}>Claim rewards</Button>
 
               <Flex
                 sx={{

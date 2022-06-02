@@ -8,3 +8,12 @@
   src: url("/fonts/AvertaStdBold/font.woff2") format("woff2"),
     url("/fonts/AvertaStdBold/font.woff") format("woff");
 }
+
+@font-face {
+  font-family: "Funghetto";
+  src: url("https://uploads-ssl.webflow.com/61b843f68cc9ce09b38de69f/61bc72463487348336522998_FunGhetto%20Trial.ttf")
+    format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
