@@ -67,25 +67,27 @@ const useStaking = () => {
     }
   }, [publicKey]);
 
+  const fetchFarmer = useCallback(async () => {
+    const farm = findFarmAddress({
+      authority: farmAuthorityPubKey,
+      rewardMint,
+    });
+
+    setFeedbackStatus("Fetching farmer...");
+    const farmer = findFarmerAddress({ farm, owner: publicKey });
+    const farmerAccount = await Farmer.fetch(connection, farmer);
+
+    if (!farmerAccount) {
+      setFarmerAccount(false);
+
+      return true;
+    }
+
+    setFarmerAccount(farmerAccount);
+    setFeedbackStatus("");
+  }, [publicKey]);
+
   useEffect(() => {
-    const fetchFarmer = async () => {
-      const farm = findFarmAddress({
-        authority: farmAuthorityPubKey,
-        rewardMint,
-      });
-
-      const farmer = findFarmerAddress({ farm, owner: publicKey });
-      const farmerAccount = await Farmer.fetch(connection, farmer);
-
-      if (!farmerAccount) {
-        setFarmerAccount(false);
-
-        return true;
-      }
-
-      setFarmerAccount(farmerAccount);
-    };
-
     if (publicKey) {
       fetchFarmer();
       fetchReceipts();
@@ -119,7 +121,9 @@ const useStaking = () => {
 
     await connection.confirmTransaction(txid);
 
-    console.log(txid);
+    setFeedbackStatus("Success!");
+
+    await fetchFarmer();
   };
 
   const stakeAll = async (mints: web3.PublicKey[]) => {
