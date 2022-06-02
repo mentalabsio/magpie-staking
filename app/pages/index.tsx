@@ -36,6 +36,7 @@ export default function Home() {
   ]);
 
   const [selectedWalletItems, setSelectedWalletItems] = useState<NFT[]>([]);
+  const [isBuffFormOpen, setIsBuffFormOpen] = useState(false);
 
   /**
    * Handles selected items.
@@ -146,6 +147,7 @@ export default function Home() {
           maxWidth: "64rem",
           position: "relative",
           padding: "0 1.6rem",
+          paddingBottom: "12.8rem",
         }}
       >
         <Heading
@@ -310,7 +312,6 @@ export default function Home() {
                     }}
                   >
                     <>
-                      Normals:
                       <div
                         sx={{
                           display: "grid",
@@ -342,7 +343,6 @@ export default function Home() {
                             ))
                           : null}
                       </div>
-                      Pairs:
                       {reducedReceipts
                         ? Object.entries(reducedReceipts.buffed).map(
                             ([key, value]) => {
@@ -398,27 +398,45 @@ export default function Home() {
                           )
                         : null}
                     </>
-                    <form
+                    <Button
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "1.6rem",
+                        alignSelf: "center",
+                        margin: "3.2rem 0",
                       }}
-                      onSubmit={handleBuffFormSubmit}
+                      variant="secondary"
+                      onClick={() => setIsBuffFormOpen((prev) => !prev)}
                     >
-                      <NFTSelectInput
-                        NFTs={stakeReceipts?.map((receipt) => receipt.metadata)}
-                        name="to_buff"
-                      />
-                      <NFTSelectInput
-                        NFTs={stakeReceipts?.map((receipt) => receipt.metadata)}
-                        name="to_buff"
-                      />
-                      <NFTSelectInput NFTs={bufferNFTs} name="buffer_mint" />
-                      <Button type="submit" variant="secondary">
-                        Buff an NFT pair!
-                      </Button>
-                    </form>
+                      Buff a pair!
+                    </Button>
+                    {isBuffFormOpen ? (
+                      <form
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "1.6rem",
+                          alignItems: "center",
+                        }}
+                        onSubmit={handleBuffFormSubmit}
+                      >
+                        Select NFT A:
+                        <NFTSelectInput
+                          NFTs={stakeReceipts?.map(
+                            (receipt) => receipt.metadata
+                          )}
+                          name="to_buff"
+                        />
+                        Select NFT A:
+                        <NFTSelectInput
+                          NFTs={stakeReceipts?.map(
+                            (receipt) => receipt.metadata
+                          )}
+                          name="to_buff"
+                        />
+                        Select Sunshine:
+                        <NFTSelectInput NFTs={bufferNFTs} name="buffer_mint" />
+                        <Button type="submit">Buff an NFT pair!</Button>
+                      </form>
+                    ) : null}
                   </Flex>
                 </TabPanel>
               </Tabs>
