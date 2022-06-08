@@ -23,11 +23,12 @@ import {
   initializeFarmer,
   removeFromWhitelist,
   stake,
-  StakeArgs,
   unstake,
 } from "./gen/instructions";
 import { debuffPair } from "./gen/instructions/debuffPair";
-import { LockConfigFields, WhitelistTypeKind } from "./gen/types";
+import { StakeArgs } from "./gen/instructions/stake";
+import { WhitelistTypeKind } from "./gen/types";
+import { LockConfigFields } from "./gen/types/LockConfig";
 import {
   findWhitelistProofAddress,
   findFarmAddress,
@@ -511,11 +512,9 @@ export const StakingProgram = (connection: Connection) => {
 
       mintA,
       mintAReceipt,
-      mintAWhitelist,
 
       mintB,
       mintBReceipt,
-      mintBWhitelist,
 
       authority,
 

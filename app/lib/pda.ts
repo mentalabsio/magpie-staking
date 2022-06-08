@@ -2,7 +2,7 @@ import { utils } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 
 import { PROGRAM_ID } from "./gen/programId";
-import { LockConfigFields } from "./gen/types";
+import { LockConfigFields } from "./gen/types/LockConfig";
 
 export const findFarmAddress = ({
   authority,

@@ -1,38 +1,37 @@
-import { PublicKey, Connection } from "@solana/web3.js"
-import BN from "bn.js" // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from "@project-serum/borsh" // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from "../types" // eslint-disable-line @typescript-eslint/no-unused-vars
-import { PROGRAM_ID } from "../programId"
+import { PublicKey, Connection } from "@solana/web3.js";
+import BN from "bn.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@project-serum/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { PROGRAM_ID } from "../programId";
 
 export interface FarmerFields {
-  farm: PublicKey
-  owner: PublicKey
-  accruedRewards: BN
-  totalRewardRate: BN
-  lastUpdate: BN
-  bump: Array<number>
+  farm: PublicKey;
+  owner: PublicKey;
+  accruedRewards: BN;
+  totalRewardRate: BN;
+  lastUpdate: BN;
+  bump: Array<number>;
 }
 
 export interface FarmerJSON {
-  farm: string
-  owner: string
-  accruedRewards: string
-  totalRewardRate: string
-  lastUpdate: string
-  bump: Array<number>
+  farm: string;
+  owner: string;
+  accruedRewards: string;
+  totalRewardRate: string;
+  lastUpdate: string;
+  bump: Array<number>;
 }
 
 export class Farmer {
-  readonly farm: PublicKey
-  readonly owner: PublicKey
-  readonly accruedRewards: BN
-  readonly totalRewardRate: BN
-  readonly lastUpdate: BN
-  readonly bump: Array<number>
+  readonly farm: PublicKey;
+  readonly owner: PublicKey;
+  readonly accruedRewards: BN;
+  readonly totalRewardRate: BN;
+  readonly lastUpdate: BN;
+  readonly bump: Array<number>;
 
   static readonly discriminator = Buffer.from([
     254, 63, 81, 98, 130, 38, 28, 219,
-  ])
+  ]);
 
   static readonly layout = borsh.struct([
     borsh.publicKey("farm"),
@@ -41,57 +40,57 @@ export class Farmer {
     borsh.u64("totalRewardRate"),
     borsh.u64("lastUpdate"),
     borsh.array(borsh.u8(), 1, "bump"),
-  ])
+  ]);
 
   constructor(fields: FarmerFields) {
-    this.farm = fields.farm
-    this.owner = fields.owner
-    this.accruedRewards = fields.accruedRewards
-    this.totalRewardRate = fields.totalRewardRate
-    this.lastUpdate = fields.lastUpdate
-    this.bump = fields.bump
+    this.farm = fields.farm;
+    this.owner = fields.owner;
+    this.accruedRewards = fields.accruedRewards;
+    this.totalRewardRate = fields.totalRewardRate;
+    this.lastUpdate = fields.lastUpdate;
+    this.bump = fields.bump;
   }
 
   static async fetch(
     c: Connection,
     address: PublicKey
   ): Promise<Farmer | null> {
-    const info = await c.getAccountInfo(address)
+    const info = await c.getAccountInfo(address);
 
     if (info === null) {
-      return null
+      return null;
     }
     if (!info.owner.equals(PROGRAM_ID)) {
-      throw new Error("account doesn't belong to this program")
+      throw new Error("account doesn't belong to this program");
     }
 
-    return this.decode(info.data)
+    return this.decode(info.data);
   }
 
   static async fetchMultiple(
     c: Connection,
     addresses: PublicKey[]
   ): Promise<Array<Farmer | null>> {
-    const infos = await c.getMultipleAccountsInfo(addresses)
+    const infos = await c.getMultipleAccountsInfo(addresses);
 
     return infos.map((info) => {
       if (info === null) {
-        return null
+        return null;
       }
       if (!info.owner.equals(PROGRAM_ID)) {
-        throw new Error("account doesn't belong to this program")
+        throw new Error("account doesn't belong to this program");
       }
 
-      return this.decode(info.data)
-    })
+      return this.decode(info.data);
+    });
   }
 
   static decode(data: Buffer): Farmer {
     if (!data.slice(0, 8).equals(Farmer.discriminator)) {
-      throw new Error("invalid account discriminator")
+      throw new Error("invalid account discriminator");
     }
 
-    const dec = Farmer.layout.decode(data.slice(8))
+    const dec = Farmer.layout.decode(data.slice(8));
 
     return new Farmer({
       farm: dec.farm,
@@ -100,7 +99,7 @@ export class Farmer {
       totalRewardRate: dec.totalRewardRate,
       lastUpdate: dec.lastUpdate,
       bump: dec.bump,
-    })
+    });
   }
 
   toJSON(): FarmerJSON {
@@ -111,7 +110,7 @@ export class Farmer {
       totalRewardRate: this.totalRewardRate.toString(),
       lastUpdate: this.lastUpdate.toString(),
       bump: this.bump,
-    }
+    };
   }
 
   static fromJSON(obj: FarmerJSON): Farmer {
@@ -122,6 +121,6 @@ export class Farmer {
       totalRewardRate: new BN(obj.totalRewardRate),
       lastUpdate: new BN(obj.lastUpdate),
       bump: obj.bump,
-    })
+    });
   }
 }
