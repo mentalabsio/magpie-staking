@@ -26,6 +26,7 @@ export default function Home() {
     fetchReceipts,
     buffPair,
     debuffPair,
+    stakeFungibleTokens,
   } = useStaking();
   const { walletNFTs, fetchNFTs } = useWalletNFTs([
     "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs",
@@ -440,6 +441,18 @@ export default function Home() {
                   </Flex>
                 </TabPanel>
               </Tabs>
+            </Flex>
+
+            <Flex
+              my="3.2rem"
+              sx={{
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "1.6rem",
+              }}
+            >
+              Stake Fungible
+              <Button onClick={stakeFungibleTokens}>Stake fungible</Button>
             </Flex>
           </>
         ) : null}

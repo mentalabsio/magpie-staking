@@ -2,7 +2,7 @@
 seeds = false
 
 [programs.localnet]
-magicshards_staking = "3LrsNgisAKcHHdqhaea7b34TrhNBFVdT8gt7zBCCBngi"
+magicshards_staking = "6es4jWC7maTU9ws2c6QRCmXyVYKM5YRj2dFwQCHGyNii"
 
 [registry]
 url = "https://anchor.projectserum.com"
