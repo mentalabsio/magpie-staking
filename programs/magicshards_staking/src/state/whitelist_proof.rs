@@ -10,8 +10,6 @@ pub enum WhitelistType {
     Creator,
     // A fungible token address.
     Mint,
-    // A NFT that will be used to buff the staking accounts.
-    Buff,
 }
 
 #[account]
@@ -37,7 +35,7 @@ impl WhitelistProof {
         use WhitelistType::*;
         let creator_or_mint_key = match proof.ty {
             Mint => mint.key(),
-            Buff | Creator => {
+            Creator => {
                 // If we need to check the creator, then we look at the remaining accounts so we
                 // can access this mint's metadata account.
                 let raw_account = remaining_accounts.first();

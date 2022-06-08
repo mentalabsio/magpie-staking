@@ -57,14 +57,6 @@ pub mod magicshards_staking {
         instructions::unstake::handler(ctx)
     }
 
-    pub fn buff_pair<'info>(ctx: Context<'_, '_, '_, 'info, BuffPair<'info>>) -> Result<()> {
-        instructions::buff_pair::handler(ctx)
-    }
-
-    pub fn debuff_pair(ctx: Context<DebuffPair>) -> Result<()> {
-        instructions::debuff_pair::handler(ctx)
-    }
-
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
         instructions::claim_rewards::handler(ctx)
     }

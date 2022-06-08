@@ -94,11 +94,6 @@ pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, Stake<'info>>, amount: u64
         ctx.remaining_accounts,
     )?;
 
-    if let WhitelistType::Buff = whitelist_proof.ty {
-        msg!("Cannot stake a buff NFT.");
-        return Err(error!(StakingError::InvalidWhitelistType));
-    }
-
     // Lock the nft to the farmer account.
     ctx.accounts.lock_gem(amount)?;
 
@@ -118,7 +113,6 @@ pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, Stake<'info>>, amount: u64
             lock: ctx.accounts.lock.key(),
             farmer: ctx.accounts.farmer.key(),
             mint: ctx.accounts.gem_mint.key(),
-            buff: None,
             reward_rate,
             amount,
         };

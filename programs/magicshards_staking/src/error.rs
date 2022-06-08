@@ -20,15 +20,6 @@ pub enum StakingError {
     #[msg("Attempt to operate on a gem that is no longer staked.")]
     GemNotStaked,
 
-    #[msg("This NFT is already being buffed.")]
-    GemAlreadyBuffed,
-
-    #[msg("This NFT was not buffed.")]
-    GemNotBuffed,
-
-    #[msg("The gem must be debuffed before realizing this operation.")]
-    GemStillBuffed,
-
     #[msg("Invalid whitelist type.")]
     InvalidWhitelistType,
 

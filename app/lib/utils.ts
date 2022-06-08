@@ -1,6 +1,6 @@
 import {
   Metadata,
-  MetadataProgram,
+  PROGRAM_ID as METADATA_PROGRAM_ID,
 } from "@metaplex-foundation/mpl-token-metadata";
 import { web3, utils } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
@@ -72,19 +72,19 @@ export const tryFindCreator = async (
       await PublicKey.findProgramAddress(
         [
           Buffer.from("metadata"),
-          MetadataProgram.PUBKEY.toBuffer(),
+          METADATA_PROGRAM_ID.toBuffer(),
           mint.toBuffer(),
         ],
-        MetadataProgram.PUBKEY
+        METADATA_PROGRAM_ID,
       )
     )[0];
 
     // Try to find metadata account.
-    const metadataAccount = await Metadata.findByMint(connection, mint);
+    const metadataAccount = await Metadata.fromAccountAddress(connection, metadataAddress);
 
     // If we do, then we're trying to stake an NFT.
     const creatorAddress = new web3.PublicKey(
-      metadataAccount.data.data.creators.find((c) => c.verified).address
+      metadataAccount.data.creators.find((c) => c.verified).address
     );
 
     return { creatorAddress, metadataAddress };

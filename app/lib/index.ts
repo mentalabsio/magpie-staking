@@ -1,10 +1,5 @@
 import { BN, utils, web3 } from "@project-serum/anchor";
 import {
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  Token,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
-import {
   AccountMeta,
   Connection,
   PublicKey,
@@ -15,7 +10,6 @@ import { Farm, StakeReceipt } from "./gen/accounts";
 import {
   addManager,
   addToWhitelist,
-  buffPair,
   claimRewards,
   createFarm,
   createLocks,
@@ -26,7 +20,6 @@ import {
   StakeArgs,
   unstake,
 } from "./gen/instructions";
-import { debuffPair } from "./gen/instructions/debuffPair";
 import { LockConfigFields, WhitelistTypeKind } from "./gen/types";
 import {
   findWhitelistProofAddress,
@@ -97,20 +90,6 @@ interface IUnstake {
   owner: PublicKey;
 }
 
-interface IBuffPair {
-  farm: PublicKey;
-  buffMint: PublicKey;
-  pair: [PublicKey, PublicKey];
-  authority: PublicKey;
-}
-
-interface IDebuffPair {
-  farm: PublicKey;
-  buffMint: PublicKey;
-  pair: [PublicKey, PublicKey];
-  authority: PublicKey;
-}
-
 interface IClaimRewards {
   farm: PublicKey;
   authority: PublicKey;
@@ -122,7 +101,7 @@ export const StakingProgram = (connection: Connection) => {
   const associatedTokenProgram = utils.token.ASSOCIATED_PROGRAM_ID;
   const rent = SYSVAR_RENT_PUBKEY;
 
-  const createCreateFarmInstruction = async ({
+  const createFarmInstruction = async ({
     rewardMint,
     authority,
   }: ICreateFarm) => {
@@ -454,137 +433,9 @@ export const StakingProgram = (connection: Connection) => {
     return { ix };
   };
 
-  const createBuffPairInstruction = async ({
-    farm,
-    buffMint,
-    pair,
-    authority,
-  }: IBuffPair) => {
-    const farmer = findFarmerAddress({ farm, owner: authority });
-
-    const { metadataAddress, creatorAddress } = await tryFindCreator(
-      connection,
-      buffMint
-    );
-
-    const metadata = {
-      pubkey: metadataAddress,
-      isSigner: false,
-      isWritable: false,
-    };
-
-    const buffUserAta = await utils.token.associatedAddress({
-      mint: buffMint,
-      owner: authority,
-    });
-
-    const buffVault = await utils.token.associatedAddress({
-      mint: buffMint,
-      owner: farmer,
-    });
-
-    const buffWhitelist = findWhitelistProofAddress({
-      farm,
-      creatorOrMint: creatorAddress,
-    });
-
-    const [
-      { mint: mintA, receipt: mintAReceipt, whitelist: mintAWhitelist },
-      { mint: mintB, receipt: mintBReceipt, whitelist: mintBWhitelist },
-    ] = pair.map((mint) => {
-      const receipt = findStakeReceiptAddress({ farmer, mint });
-      const whitelist = findWhitelistProofAddress({
-        farm,
-        creatorOrMint: mint,
-      });
-      return { mint, receipt, whitelist };
-    });
-
-    const ix = buffPair({
-      farm,
-      farmer,
-
-      buffMint,
-      buffUserAta,
-      buffVault,
-      buffWhitelist,
-
-      mintA,
-      mintAReceipt,
-      mintAWhitelist,
-
-      mintB,
-      mintBReceipt,
-      mintBWhitelist,
-
-      authority,
-
-      rent,
-      systemProgram,
-      tokenProgram,
-      associatedTokenProgram,
-    });
-
-    ix.keys.push(metadata);
-
-    return { ix };
-  };
-
-  const createDebuffPairInstruction = async ({
-    authority,
-    buffMint,
-    farm,
-    pair,
-  }: IDebuffPair) => {
-    const farmer = findFarmerAddress({ farm, owner: authority });
-
-    const buffUserAta = await utils.token.associatedAddress({
-      mint: buffMint,
-      owner: authority,
-    });
-
-    const buffVault = await utils.token.associatedAddress({
-      mint: buffMint,
-      owner: farmer,
-    });
-
-    const [
-      { mint: mintA, receipt: mintAReceipt },
-      { mint: mintB, receipt: mintBReceipt },
-    ] = pair.map((mint) => {
-      const receipt = findStakeReceiptAddress({ farmer, mint });
-      const whitelist = findWhitelistProofAddress({
-        farm,
-        creatorOrMint: mint,
-      });
-      return { mint, receipt, whitelist };
-    });
-
-    const ix = debuffPair({
-      farm,
-      farmer,
-
-      buffMint,
-      buffVault,
-      buffUserAta,
-
-      mintA,
-      mintAReceipt,
-
-      mintB,
-      mintBReceipt,
-
-      authority,
-
-      tokenProgram,
-    });
-
-    return { ix };
-  };
-
   return {
     // Admin-domain
-    createCreateFarmInstruction,
+    createFarmInstruction,
     createCreateLocksInstruction,
     createAddToWhitelistInstruction,
     createRemoveFromWhitelistInstruction,
@@ -595,7 +446,5 @@ export const StakingProgram = (connection: Connection) => {
     createClaimRewardsInstruction,
     createStakeInstruction,
     createUnstakeInstruction,
-    createBuffPairInstruction,
-    createDebuffPairInstruction,
   };
 };

@@ -58,9 +58,9 @@ describe("staking-program", () => {
   // NFTs that will be staked.
   const nft = new PublicKey("SaCd2fYycnD2wcUJWZNfF2xGAVvcUaVeTnEz7MUibm5");
 
-  const otherNft = new PublicKey(
-    "F8DBPPFwjddGdqs4EXdJTj3xqC8NE8FzUEzYQfMXt8Rs"
-  );
+  // const otherNft = new PublicKey(
+  //   "F8DBPPFwjddGdqs4EXdJTj3xqC8NE8FzUEzYQfMXt8Rs"
+  // );
 
   // Whitelisted creator address.
   const creatorAddress = new PublicKey(
@@ -68,13 +68,13 @@ describe("staking-program", () => {
   );
 
   // NFT that will be used as a buff.
-  const buffCreator = new PublicKey(
-    "62vz2oMLFf6k4DcX23tA6hR4ixDGUVxqk4gJf7iCGiEx"
-  );
-
-  const buffMint = new PublicKey(
-    "Cfm3x9CXn1jDJK2k67h3KiDMWSxerKCqf4ZHZF9ydPq2"
-  );
+  //   const buffCreator = new PublicKey(
+  //     "62vz2oMLFf6k4DcX23tA6hR4ixDGUVxqk4gJf7iCGiEx"
+  //   );
+  //
+  //   const buffMint = new PublicKey(
+  //     "Cfm3x9CXn1jDJK2k67h3KiDMWSxerKCqf4ZHZF9ydPq2"
+  //   );
 
   const userWallet = anchor.web3.Keypair.fromSecretKey(
     anchor.utils.bytes.bs58.decode(
@@ -99,7 +99,7 @@ describe("staking-program", () => {
   });
 
   it("should be able to create a new farm.", async () => {
-    const { ix } = await stakingClient.createCreateFarmInstruction({
+    const { ix } = await stakingClient.createFarmInstruction({
       authority: farmAuthority.publicKey,
       rewardMint,
     });
@@ -178,16 +178,6 @@ describe("staking-program", () => {
       rewardMint,
     });
 
-    const whitelistBuff = await stakingClient.createAddToWhitelistInstruction({
-      farm,
-      authority: farmAuthority.publicKey,
-      // Since this is a buff, the rewardRate will act as a multiplier.
-      // Here it will buff the pair reward in 2x.
-      rewardRate: { tokenAmount: new BN(2), intervalInSeconds: new BN(1) },
-      creatorOrMint: buffCreator,
-      whitelistType: new WhitelistType.Buff(),
-    });
-
     const whitelistCreator =
       await stakingClient.createAddToWhitelistInstruction({
         creatorOrMint: creatorAddress,
@@ -197,11 +187,7 @@ describe("staking-program", () => {
         whitelistType: new WhitelistType.Creator(),
       });
 
-    await send(
-      connection,
-      [whitelistBuff.ix, whitelistCreator.ix],
-      [farmAuthority]
-    );
+    await send(connection, [whitelistCreator.ix], [farmAuthority]);
 
     const whitelistProof = findWhitelistProofAddress({
       farm,
@@ -319,65 +305,6 @@ describe("staking-program", () => {
     expect(reward.available.toNumber()).to.equal(
       100_000e9 - expectedReservedReward
     );
-  });
-
-  it("should be able to buff a pair", async () => {
-    const farm = findFarmAddress({
-      authority: farmAuthority.publicKey,
-      rewardMint,
-    });
-
-    const locks = await findFarmLocks(connection, farm);
-    const lock = locks.find((lock) => lock.bonusFactor === 0);
-
-    const stakeNft = await stakingClient.createStakeInstruction({
-      farm,
-      owner: userWallet.publicKey,
-      mint: otherNft,
-      lock: lock.address,
-      args: { amount: new BN(1) },
-    });
-
-    const { ix } = await stakingClient.createBuffPairInstruction({
-      farm,
-      buffMint,
-      pair: [nft, otherNft],
-      authority: userWallet.publicKey,
-    });
-
-    await send(connection, [stakeNft.ix, ix], [farmAuthority, userWallet]);
-
-    const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
-    const farmerAccount = await Farmer.fetch(connection, farmer);
-
-    expect(farmerAccount.totalRewardRate.toNumber()).to.equal(400);
-  });
-
-  it("should be able to debuff a pair", async () => {
-    const farm = findFarmAddress({
-      authority: farmAuthority.publicKey,
-      rewardMint,
-    });
-
-    const { ix } = await stakingClient.createDebuffPairInstruction({
-      farm,
-      buffMint,
-      pair: [nft, otherNft],
-      authority: userWallet.publicKey,
-    });
-
-    const unstakeOtherNft = await stakingClient.createUnstakeInstruction({
-      farm,
-      owner: userWallet.publicKey,
-      mint: otherNft,
-    });
-
-    await send(connection, [ix, unstakeOtherNft.ix], [userWallet]);
-
-    const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
-    const farmerAccount = await Farmer.fetch(connection, farmer);
-
-    expect(farmerAccount.totalRewardRate.toNumber()).to.equal(100);
   });
 
   it("should be able to unstake an NFT", async () => {
