@@ -20,7 +20,7 @@ export const reactTabsStyles = {
   ".react-tabs__tab--selected": {
     backgroundColor: "primary",
     borderColor: "background2",
-    color: "background",
+    color: "text",
     borderRadius: "5px 5px 0 0",
   },
   ".react-tabs__tab--disabled": { color: "GrayText", cursor: "default" },

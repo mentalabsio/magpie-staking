@@ -151,25 +151,11 @@ export default function Home() {
           paddingBottom: "12.8rem",
         }}
       >
-        <Heading
-          sx={{
-            position: "relative",
-            fontSize: "6.4rem",
-            lineHeight: 0.5,
-            fontFamily: "Funghetto, sans-serif",
-            marginTop: "3.2rem",
-          }}
-          mb=".8rem"
-          variant="heading1"
-        >
-          NFTabs
-        </Heading>
         <Text
           sx={{
             position: "relative",
             marginBottom: "3.2rem",
             fontSize: "3.2rem",
-            fontFamily: "Funghetto, sans-serif",
           }}
         >
           Staking
