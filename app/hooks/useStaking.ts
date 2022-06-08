@@ -11,11 +11,11 @@ import { getNFTMetadata } from "utils/nfts";
 import { NFT } from "./useWalletNFTs";
 
 const farmAuthorityPubKey = new web3.PublicKey(
-  "2EywcPUJFn9g7FjoVezsTMdX4ah7SHRmqyf6qXSNv9TL"
+  "CoE4yxLHMiR4PFpsVx6YkvQaDvEYV9p7Pc1tdTkJKhRJ"
 );
 
 const rewardMint = new web3.PublicKey(
-  "HAasJiLpJzUJt198aPWTTQePmcobUndJ7TFe419tG3wf"
+  "7Q2Kp5RiW4Es3yz1iirPNeBrFYtdabCDz86pcjRUseeq"
 );
 
 export type StakeReceiptWithMetadata = StakeReceipt & {
@@ -108,7 +108,7 @@ const useStaking = () => {
       owner: publicKey,
     });
 
-    const latest = await connection.getLatestBlockhash("finalized");
+    const latest = await connection.getLatestBlockhash();
     const tx = new Transaction({
       blockhash: latest.blockhash,
       lastValidBlockHeight: latest.lastValidBlockHeight,
@@ -344,7 +344,7 @@ const useStaking = () => {
     const tx = new Transaction();
 
     tx.add(ix);
-    const latest = await connection.getLatestBlockhash("max");
+    const latest = await connection.getLatestBlockhash();
     tx.recentBlockhash = latest.blockhash;
     tx.feePayer = publicKey;
 
