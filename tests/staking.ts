@@ -44,7 +44,7 @@ const send = (
   return withParsedError(sendAndConfirmTransaction)(connection, tx, signers);
 };
 
-describe("staking-program", () => {
+describe("magpie-staking", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
