@@ -52,7 +52,7 @@ export const findUserStakeReceipts = async (
   const accounts = await fetchAccounts(connection, filters);
 
   return Promise.all(
-    accounts.map(async (account) => {
+    accounts.map(async account => {
       return StakeReceipt.decode(account.account.data);
     })
   );
@@ -75,16 +75,19 @@ export const tryFindCreator = async (
           METADATA_PROGRAM_ID.toBuffer(),
           mint.toBuffer(),
         ],
-        METADATA_PROGRAM_ID,
+        METADATA_PROGRAM_ID
       )
     )[0];
 
     // Try to find metadata account.
-    const metadataAccount = await Metadata.fromAccountAddress(connection, metadataAddress);
+    const metadataAccount = await Metadata.fromAccountAddress(
+      connection,
+      metadataAddress
+    );
 
     // If we do, then we're trying to stake an NFT.
     const creatorAddress = new web3.PublicKey(
-      metadataAccount.data.creators.find((c) => c.verified).address
+      metadataAccount.data.creators.find(c => c.verified).address
     );
 
     return { creatorAddress, metadataAddress };

@@ -67,14 +67,14 @@ describe("magpie-staking", () => {
     "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs"
   );
 
-  // NFT that will be used as a buff.
-  //   const buffCreator = new PublicKey(
-  //     "62vz2oMLFf6k4DcX23tA6hR4ixDGUVxqk4gJf7iCGiEx"
-  //   );
-  //
-  //   const buffMint = new PublicKey(
-  //     "Cfm3x9CXn1jDJK2k67h3KiDMWSxerKCqf4ZHZF9ydPq2"
-  //   );
+  // NFT that will be used as an object.
+  const objectMint = new PublicKey(
+    "Cfm3x9CXn1jDJK2k67h3KiDMWSxerKCqf4ZHZF9ydPq2"
+  );
+
+  const objectCreator = new PublicKey(
+    "J1E9xvBsE8gwfV8qXVxbQ6H2wfEEKjRaxS2ENiZm4h2D"
+  );
 
   const userWallet = anchor.web3.Keypair.fromSecretKey(
     anchor.utils.bytes.bs58.decode(
@@ -84,8 +84,6 @@ describe("magpie-staking", () => {
 
   let rewardMint: PublicKey;
 
-  console.log(farmAuthority.publicKey.toString());
-
   before(async () => {
     // Create new fungible token and mint to farmAuthority.
     const { mint } = await createFungibleToken(connection, farmAuthority);
@@ -94,8 +92,6 @@ describe("magpie-staking", () => {
     await transferToken(connection, mint, farmAuthority, userWallet.publicKey);
 
     rewardMint = mint;
-
-    console.log(mint.toString());
   });
 
   it("should be able to create a new farm.", async () => {
@@ -142,14 +138,14 @@ describe("magpie-staking", () => {
 
     await send(connection, [ix], [farmAuthority]);
 
-    const locks = (await findFarmLocks(connection, farm)).map((acc) =>
+    const locks = (await findFarmLocks(connection, farm)).map(acc =>
       acc.toJSON()
     );
 
     // console.log(locks);
 
     expect(locks.length).to.be.equal(lockConfigs.length);
-    expect(locks.every((lock) => lock.farm === farm.toBase58())).to.be.true;
+    expect(locks.every(lock => lock.farm === farm.toBase58())).to.be.true;
   });
 
   it("should be able to fund a farm's rewards", async () => {
@@ -178,6 +174,22 @@ describe("magpie-staking", () => {
       rewardMint,
     });
 
+    // 5 tokens/day
+    const objectRewardRate = {
+      intervalInSeconds: new BN(86_400),
+      tokenAmount: new BN(5e6),
+    };
+
+    const whitelistObject = await stakingClient.createAddToWhitelistInstruction(
+      {
+        farm,
+        authority: farmAuthority.publicKey,
+        rewardRate: objectRewardRate,
+        creatorOrMint: objectCreator,
+        whitelistType: new WhitelistType.AssociatedObject(),
+      }
+    );
+
     const whitelistCreator =
       await stakingClient.createAddToWhitelistInstruction({
         creatorOrMint: creatorAddress,
@@ -187,24 +199,44 @@ describe("magpie-staking", () => {
         whitelistType: new WhitelistType.Creator(),
       });
 
-    await send(connection, [whitelistCreator.ix], [farmAuthority]);
+    await send(
+      connection,
+      [whitelistCreator.ix, whitelistObject.ix],
+      [farmAuthority]
+    );
 
-    const whitelistProof = findWhitelistProofAddress({
+    const objectWhitelist = findWhitelistProofAddress({
+      farm,
+      creatorOrMint: objectCreator,
+    });
+
+    const objectWhitelistAccount = await WhitelistProof.fetch(
+      connection,
+      objectWhitelist
+    );
+
+    const creatorWhitelist = findWhitelistProofAddress({
       farm,
       creatorOrMint: creatorAddress,
     });
 
-    const whitelistProofAccount = await WhitelistProof.fetch(
+    const creatorWhitelistAccount = await WhitelistProof.fetch(
       connection,
-      whitelistProof
+      creatorWhitelist
     );
 
-    expect(whitelistProofAccount.farm.toString()).to.eql(farm.toString());
-    expect(whitelistProofAccount.whitelistedAddress.toString()).to.eql(
+    expect(creatorWhitelistAccount.farm.toString()).to.eql(farm.toString());
+    expect(creatorWhitelistAccount.whitelistedAddress.toString()).to.eql(
       creatorAddress.toString()
     );
-    expect(whitelistProofAccount.ty.kind).to.equal("Creator");
-    expect(whitelistProofAccount.rewardRate.toNumber()).to.equal(100);
+    expect(creatorWhitelistAccount.ty.kind).to.equal("Creator");
+    expect(creatorWhitelistAccount.rewardRate.toNumber()).to.equal(100);
+
+    expect(objectWhitelistAccount.ty.kind).to.equal("AssociatedObject");
+    expect(objectWhitelistAccount.rewardRate.toNumber()).to.equal(57);
+    expect(objectWhitelistAccount.whitelistedAddress.toString()).to.eql(
+      objectCreator.toString()
+    );
   });
 
   it("should be able to whitelist a mint address", async () => {
@@ -275,7 +307,7 @@ describe("magpie-staking", () => {
     });
 
     const locks = await findFarmLocks(connection, farm);
-    const lock = locks.find((lock) => lock.bonusFactor === 0);
+    const lock = locks.find(lock => lock.bonusFactor === 0);
 
     const { ix } = await stakingClient.createStakeInstruction({
       farm,
@@ -307,9 +339,32 @@ describe("magpie-staking", () => {
     );
   });
 
+  it("should be able to add an object", async () => {
+    const farm = findFarmAddress({
+      authority: farmAuthority.publicKey,
+      rewardMint,
+    });
+
+    const { ix } = await stakingClient.createAddObjectInstruction({
+      farm,
+      mint: nft,
+      object: objectMint,
+      owner: userWallet.publicKey,
+    });
+
+    await send(connection, [ix], [userWallet]);
+
+    const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
+    const receipt = findStakeReceiptAddress({ farmer, mint: nft });
+
+    const receiptAccount = await StakeReceipt.fetch(connection, receipt);
+
+    console.log(receiptAccount.toJSON());
+  });
+
   it("should be able to unstake an NFT", async () => {
     // Sleep for 2 seconds
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const farm = findFarmAddress({
       authority: farmAuthority.publicKey,
@@ -342,7 +397,7 @@ describe("magpie-staking", () => {
     });
 
     const locks = await findFarmLocks(connection, farm);
-    const lock = locks.find((lock) => lock.bonusFactor === 0);
+    const lock = locks.find(lock => lock.bonusFactor === 0);
 
     const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
 
@@ -370,7 +425,7 @@ describe("magpie-staking", () => {
     });
 
     const locks = await findFarmLocks(connection, farm);
-    const lock = locks.find((lock) => lock.bonusFactor === 0);
+    const lock = locks.find(lock => lock.bonusFactor === 0);
 
     try {
       const { ix } = await stakingClient.createStakeInstruction({
@@ -416,7 +471,7 @@ describe("magpie-staking", () => {
 
   it("should be able to unstake a fungible token", async () => {
     // Sleep for 2 seconds so the rewards get updated.
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const farm = findFarmAddress({
       authority: farmAuthority.publicKey,

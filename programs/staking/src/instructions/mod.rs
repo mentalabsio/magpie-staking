@@ -1,4 +1,5 @@
 pub mod add_manager;
+pub mod add_object;
 pub mod add_to_whitelist;
 pub mod claim_rewards;
 pub mod create_farm;
@@ -10,6 +11,7 @@ pub mod stake;
 pub mod unstake;
 
 pub use add_manager::*;
+pub use add_object::*;
 pub use add_to_whitelist::*;
 pub use claim_rewards::*;
 pub use create_farm::*;

@@ -115,6 +115,7 @@ pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, Stake<'info>>, amount: u64
             mint: ctx.accounts.gem_mint.key(),
             reward_rate,
             amount,
+            objects: Vec::with_capacity(3),
         };
     } else {
         // Receipt account already existed.
@@ -141,6 +142,9 @@ pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, Stake<'info>>, amount: u64
 
     let reserved_amount = reward_rate as u64 * ctx.accounts.lock.duration;
 
+    ctx.accounts.farmer.update_accrued_rewards(farm)?;
+
+    // Check if the farm can afford this new stake.
     farm.reward.try_reserve(reserved_amount)?;
 
     ctx.accounts

@@ -10,6 +10,7 @@ pub enum WhitelistType {
     Creator,
     // A fungible token address.
     Mint,
+    AssociatedObject,
 }
 
 #[account]
@@ -17,7 +18,6 @@ pub struct WhitelistProof {
     pub whitelisted_address: Pubkey,
     pub farm: Pubkey,
     // Tokens/gem/sec
-    // If the type is "Buff" then this is a multiplier
     pub reward_rate: u64,
     pub ty: WhitelistType,
 }
@@ -35,11 +35,11 @@ impl WhitelistProof {
         use WhitelistType::*;
         let creator_or_mint_key = match proof.ty {
             Mint => mint.key(),
-            Creator => {
+            Creator | AssociatedObject => {
                 // If we need to check the creator, then we look at the remaining accounts so we
                 // can access this mint's metadata account.
                 let raw_account = remaining_accounts.first();
-                let metadata = raw_account // Option<T>
+                let metadata = raw_account
                     .ok_or_else(|| {
                         msg!("Metadata account for mint {} was not given.", mint.key());
                         ProgramError::InvalidAccountData

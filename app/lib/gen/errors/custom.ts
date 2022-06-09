@@ -5,8 +5,9 @@ export type CustomError =
   | GemStillLocked
   | GemStillStaked
   | GemNotStaked
+  | AddressNotWhitelisted
   | InvalidWhitelistType
-  | FactorMustBeGtZero
+  | MaxObjectsExceeded
   | ArithmeticError
 
 export class CooldownIsNotOver extends Error {
@@ -69,33 +70,43 @@ export class GemNotStaked extends Error {
   }
 }
 
-export class InvalidWhitelistType extends Error {
+export class AddressNotWhitelisted extends Error {
   readonly code = 6006
+  readonly name = "AddressNotWhitelisted"
+  readonly msg = "This mint or creator has not been whitelisted."
+
+  constructor() {
+    super("6006: This mint or creator has not been whitelisted.")
+  }
+}
+
+export class InvalidWhitelistType extends Error {
+  readonly code = 6007
   readonly name = "InvalidWhitelistType"
   readonly msg = "Invalid whitelist type."
 
   constructor() {
-    super("6006: Invalid whitelist type.")
+    super("6007: Invalid whitelist type.")
   }
 }
 
-export class FactorMustBeGtZero extends Error {
-  readonly code = 6007
-  readonly name = "FactorMustBeGtZero"
-  readonly msg = "Buff factor must be greater than 0."
+export class MaxObjectsExceeded extends Error {
+  readonly code = 6008
+  readonly name = "MaxObjectsExceeded"
+  readonly msg = "Maximum number of objects exceeded."
 
   constructor() {
-    super("6007: Buff factor must be greater than 0.")
+    super("6008: Maximum number of objects exceeded.")
   }
 }
 
 export class ArithmeticError extends Error {
-  readonly code = 6008
+  readonly code = 6009
   readonly name = "ArithmeticError"
   readonly msg = "An arithmetic error occurred."
 
   constructor() {
-    super("6008: An arithmetic error occurred.")
+    super("6009: An arithmetic error occurred.")
   }
 }
 
@@ -114,10 +125,12 @@ export function fromCode(code: number): CustomError | null {
     case 6005:
       return new GemNotStaked()
     case 6006:
-      return new InvalidWhitelistType()
+      return new AddressNotWhitelisted()
     case 6007:
-      return new FactorMustBeGtZero()
+      return new InvalidWhitelistType()
     case 6008:
+      return new MaxObjectsExceeded()
+    case 6009:
       return new ArithmeticError()
   }
 

@@ -45,6 +45,27 @@ export class Mint {
   }
 }
 
+export interface AssociatedObjectJSON {
+  kind: "AssociatedObject"
+}
+
+export class AssociatedObject {
+  readonly discriminator = 2
+  readonly kind = "AssociatedObject"
+
+  toJSON(): AssociatedObjectJSON {
+    return {
+      kind: "AssociatedObject",
+    }
+  }
+
+  toEncodable() {
+    return {
+      AssociatedObject: {},
+    }
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function fromDecoded(obj: any): types.WhitelistTypeKind {
   if (typeof obj !== "object") {
@@ -56,6 +77,9 @@ export function fromDecoded(obj: any): types.WhitelistTypeKind {
   }
   if ("Mint" in obj) {
     return new Mint()
+  }
+  if ("AssociatedObject" in obj) {
+    return new AssociatedObject()
   }
 
   throw new Error("Invalid enum object")
@@ -71,6 +95,9 @@ export function fromJSON(
     case "Mint": {
       return new Mint()
     }
+    case "AssociatedObject": {
+      return new AssociatedObject()
+    }
   }
 }
 
@@ -78,6 +105,7 @@ export function layout(property?: string) {
   const ret = borsh.rustEnum([
     borsh.struct([], "Creator"),
     borsh.struct([], "Mint"),
+    borsh.struct([], "AssociatedObject"),
   ])
   if (property !== undefined) {
     return ret.replicate(property)

@@ -1,25 +1,25 @@
-import { TransactionInstruction, PublicKey } from "@solana/web3.js" // eslint-disable-line @typescript-eslint/no-unused-vars
-import BN from "bn.js" // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from "@project-serum/borsh" // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from "../types" // eslint-disable-line @typescript-eslint/no-unused-vars
-import { PROGRAM_ID } from "../programId"
+import { TransactionInstruction, PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import BN from "bn.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@project-serum/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { PROGRAM_ID } from "../programId";
 
 export interface BuffPairAccounts {
-  farm: PublicKey
-  farmer: PublicKey
-  buffMint: PublicKey
-  buffWhitelist: PublicKey
-  buffUserAta: PublicKey
-  buffVault: PublicKey
-  mintA: PublicKey
-  mintAReceipt: PublicKey
-  mintB: PublicKey
-  mintBReceipt: PublicKey
-  authority: PublicKey
-  rent: PublicKey
-  systemProgram: PublicKey
-  tokenProgram: PublicKey
-  associatedTokenProgram: PublicKey
+  farm: PublicKey;
+  farmer: PublicKey;
+  buffMint: PublicKey;
+  buffWhitelist: PublicKey;
+  buffUserAta: PublicKey;
+  buffVault: PublicKey;
+  mintA: PublicKey;
+  mintAReceipt: PublicKey;
+  mintB: PublicKey;
+  mintBReceipt: PublicKey;
+  authority: PublicKey;
+  rent: PublicKey;
+  systemProgram: PublicKey;
+  tokenProgram: PublicKey;
+  associatedTokenProgram: PublicKey;
 }
 
 export function buffPair(accounts: BuffPairAccounts) {
@@ -43,9 +43,9 @@ export function buffPair(accounts: BuffPairAccounts) {
       isSigner: false,
       isWritable: false,
     },
-  ]
-  const identifier = Buffer.from([24, 89, 4, 84, 20, 40, 196, 30])
-  const data = identifier
-  const ix = new TransactionInstruction({ keys, programId: PROGRAM_ID, data })
-  return ix
+  ];
+  const identifier = Buffer.from([24, 89, 4, 84, 20, 40, 196, 30]);
+  const data = identifier;
+  const ix = new TransactionInstruction({ keys, programId: PROGRAM_ID, data });
+  return ix;
 }

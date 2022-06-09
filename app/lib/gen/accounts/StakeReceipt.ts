@@ -12,6 +12,7 @@ export interface StakeReceiptFields {
   endTs: BN | null
   amount: BN
   rewardRate: BN
+  objects: Array<types.AssociatedObjectFields>
 }
 
 export interface StakeReceiptJSON {
@@ -22,6 +23,7 @@ export interface StakeReceiptJSON {
   endTs: string | null
   amount: string
   rewardRate: string
+  objects: Array<types.AssociatedObjectJSON>
 }
 
 export class StakeReceipt {
@@ -32,6 +34,7 @@ export class StakeReceipt {
   readonly endTs: BN | null
   readonly amount: BN
   readonly rewardRate: BN
+  readonly objects: Array<types.AssociatedObject>
 
   static readonly discriminator = Buffer.from([
     189, 110, 129, 87, 79, 225, 96, 177,
@@ -45,6 +48,7 @@ export class StakeReceipt {
     borsh.option(borsh.u64(), "endTs"),
     borsh.u64("amount"),
     borsh.u64("rewardRate"),
+    borsh.vec(types.AssociatedObject.layout(), "objects"),
   ])
 
   constructor(fields: StakeReceiptFields) {
@@ -55,6 +59,9 @@ export class StakeReceipt {
     this.endTs = fields.endTs
     this.amount = fields.amount
     this.rewardRate = fields.rewardRate
+    this.objects = fields.objects.map(
+      (item) => new types.AssociatedObject({ ...item })
+    )
   }
 
   static async fetch(
@@ -106,6 +113,9 @@ export class StakeReceipt {
       endTs: dec.endTs,
       amount: dec.amount,
       rewardRate: dec.rewardRate,
+      objects: dec.objects.map((item) =>
+        types.AssociatedObject.fromDecoded(item)
+      ),
     })
   }
 
@@ -118,6 +128,7 @@ export class StakeReceipt {
       endTs: (this.endTs && this.endTs.toString()) || null,
       amount: this.amount.toString(),
       rewardRate: this.rewardRate.toString(),
+      objects: this.objects.map((item) => item.toJSON()),
     }
   }
 
@@ -130,6 +141,7 @@ export class StakeReceipt {
       endTs: (obj.endTs && new BN(obj.endTs)) || null,
       amount: new BN(obj.amount),
       rewardRate: new BN(obj.rewardRate),
+      objects: obj.objects.map((item) => types.AssociatedObject.fromJSON(item)),
     })
   }
 }

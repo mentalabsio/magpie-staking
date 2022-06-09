@@ -20,11 +20,14 @@ pub enum StakingError {
     #[msg("Attempt to operate on a gem that is no longer staked.")]
     GemNotStaked,
 
+    #[msg("This mint or creator has not been whitelisted.")]
+    AddressNotWhitelisted,
+
     #[msg("Invalid whitelist type.")]
     InvalidWhitelistType,
 
-    #[msg("Buff factor must be greater than 0.")]
-    FactorMustBeGtZero,
+    #[msg("Maximum number of objects exceeded.")]
+    MaxObjectsExceeded,
 
     #[msg("An arithmetic error occurred.")]
     ArithmeticError,

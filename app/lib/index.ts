@@ -9,6 +9,7 @@ import {
 import { Farm, StakeReceipt } from "./gen/accounts";
 import {
   addManager,
+  addObject,
   addToWhitelist,
   claimRewards,
   createFarm,
@@ -87,6 +88,13 @@ interface IStake {
 interface IUnstake {
   farm: PublicKey;
   mint: PublicKey;
+  owner: PublicKey;
+}
+
+interface IAddObject {
+  farm: PublicKey;
+  mint: PublicKey;
+  object: PublicKey;
   owner: PublicKey;
 }
 
@@ -184,7 +192,7 @@ export const StakingProgram = (connection: Connection) => {
       }
     );
 
-    const lockAccountMetas: AccountMeta[] = lockConfigs.map((config) => {
+    const lockAccountMetas: AccountMeta[] = lockConfigs.map(config => {
       const lockAddress = findLockAddress({ config, farm });
       return { pubkey: lockAddress, isSigner: false, isWritable: true };
     });
@@ -433,6 +441,55 @@ export const StakingProgram = (connection: Connection) => {
     return { ix };
   };
 
+  const createAddObjectInstruction = async ({
+    farm,
+    owner,
+    mint,
+    object,
+  }: IAddObject) => {
+    const farmer = findFarmerAddress({ farm, owner });
+    const receipt = findStakeReceiptAddress({ farmer, mint });
+
+    const { creatorAddress, metadataAddress } = await tryFindCreator(
+      connection,
+      object,
+    );
+
+    const objectWhitelist = findWhitelistProofAddress({
+      farm,
+      creatorOrMint: creatorAddress,
+    });
+
+    const objectVault = await utils.token.associatedAddress({
+      mint: object,
+      owner: farmer,
+    });
+
+    const userObjectAta = await utils.token.associatedAddress({ mint: object, owner });
+
+    const ix = addObject({
+      farm,
+      farmer,
+      mint,
+      receipt,
+
+      object,
+      objectMetadata: metadataAddress,
+      objectVault,
+      objectWhitelist,
+      userObjectAta,
+
+      owner,
+
+      rent,
+      systemProgram,
+      tokenProgram,
+      associatedTokenProgram,
+    });
+
+    return { ix };
+  };
+
   return {
     // Admin-domain
     createFarmInstruction,
@@ -441,10 +498,12 @@ export const StakingProgram = (connection: Connection) => {
     createRemoveFromWhitelistInstruction,
     createFundRewardInstruction,
     createAddManagerInstruction,
+
     // User-domain
     createInitializeFarmerInstruction,
     createClaimRewardsInstruction,
     createStakeInstruction,
     createUnstakeInstruction,
+    createAddObjectInstruction,
   };
 };

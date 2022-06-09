@@ -3,62 +3,59 @@ import BN from "bn.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as types from "../types"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as borsh from "@project-serum/borsh";
 
-export interface BuffFields {
+export interface ObjectFields {
   key: PublicKey;
-  factor: BN;
+  rate: BN;
 }
 
-export interface BuffJSON {
+export interface ObjectJSON {
   key: string;
-  factor: string;
+  rate: string;
 }
 
-export class Buff {
+export class Object {
   readonly key: PublicKey;
-  readonly factor: BN;
+  readonly rate: BN;
 
-  constructor(fields: BuffFields) {
+  constructor(fields: ObjectFields) {
     this.key = fields.key;
-    this.factor = fields.factor;
+    this.rate = fields.rate;
   }
 
   static layout(property?: string) {
-    return borsh.struct(
-      [borsh.publicKey("key"), borsh.u64("factor")],
-      property
-    );
+    return borsh.struct([borsh.publicKey("key"), borsh.u64("rate")], property);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new Buff({
+    return new Object({
       key: obj.key,
-      factor: obj.factor,
+      rate: obj.rate,
     });
   }
 
-  static toEncodable(fields: BuffFields) {
+  static toEncodable(fields: ObjectFields) {
     return {
       key: fields.key,
-      factor: fields.factor,
+      rate: fields.rate,
     };
   }
 
-  toJSON(): BuffJSON {
+  toJSON(): ObjectJSON {
     return {
       key: this.key.toString(),
-      factor: this.factor.toString(),
+      rate: this.rate.toString(),
     };
   }
 
-  static fromJSON(obj: BuffJSON): Buff {
-    return new Buff({
+  static fromJSON(obj: ObjectJSON): Object {
+    return new Object({
       key: new PublicKey(obj.key),
-      factor: new BN(obj.factor),
+      rate: new BN(obj.rate),
     });
   }
 
   toEncodable() {
-    return Buff.toEncodable(this);
+    return Object.toEncodable(this);
   }
 }
