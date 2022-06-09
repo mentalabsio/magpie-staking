@@ -45,7 +45,10 @@ const Wallet = ({ children }: { children: React.ReactChild }) => {
   );
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
+    <ConnectionProvider
+      endpoint={endpoint}
+      config={{ commitment: "confirmed" }}
+    >
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
           {/* <WalletMultiButton />

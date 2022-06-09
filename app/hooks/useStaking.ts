@@ -109,10 +109,7 @@ const useStaking = () => {
     });
 
     const latest = await connection.getLatestBlockhash();
-    const tx = new Transaction({
-      blockhash: latest.blockhash,
-      lastValidBlockHeight: latest.lastValidBlockHeight,
-    });
+    const tx = new Transaction();
 
     tx.recentBlockhash = latest.blockhash;
     tx.add(ix);
@@ -302,12 +299,10 @@ const useStaking = () => {
     });
 
     const latest = await connection.getLatestBlockhash("finalized");
-    const tx = new Transaction({
-      blockhash: latest.blockhash,
-      lastValidBlockHeight: latest.lastValidBlockHeight,
-    });
+    const tx = new Transaction();
 
     tx.add(ix);
+    tx.recentBlockhash = latest.blockhash;
     tx.feePayer = publicKey;
 
     setFeedbackStatus("Awaiting approval...");
