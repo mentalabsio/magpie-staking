@@ -43,21 +43,21 @@ impl Farmer {
 
         let reward = self.accrued_rewards;
 
-        farm.reward.try_release(reward)?;
+        // farm.reward.try_release(reward)?;
 
         self.accrued_rewards = 0;
 
         Ok(reward)
     }
 
-    pub fn update_accrued_rewards(&mut self, farm: &mut Farm) -> Result<()> {
+    pub fn update_accrued_rewards(&mut self, _farm: &mut Farm) -> Result<()> {
         let now = now_ts()?;
         let elapsed = now.saturating_sub(self.last_update);
         let increment = self.total_reward_rate * elapsed;
 
         if increment > 0 {
             // Before updating, we try to reserve the reward.
-            farm.reward.try_reserve(increment)?;
+            // farm.reward.try_reserve(increment)?;
 
             self.accrued_rewards = self
                 .accrued_rewards

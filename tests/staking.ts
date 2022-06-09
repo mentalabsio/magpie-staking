@@ -359,7 +359,10 @@ describe("magpie-staking", () => {
 
     const receiptAccount = await StakeReceipt.fetch(connection, receipt);
 
-    console.log(receiptAccount.toJSON());
+    expect(receiptAccount.rewardRate.toNumber()).to.equal(157);
+    expect(receiptAccount.objects.length).to.equal(1);
+    expect(receiptAccount.objects.some(o => o.key.equals(objectMint))).to.be
+      .true;
   });
 
   it("should be able to unstake an NFT", async () => {
