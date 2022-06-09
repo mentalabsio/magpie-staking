@@ -7,6 +7,8 @@ export type CustomError =
   | GemNotStaked
   | AddressNotWhitelisted
   | InvalidWhitelistType
+  | GemStillHasObjects
+  | ObjectNotFound
   | MaxObjectsExceeded
   | ArithmeticError
 
@@ -90,23 +92,43 @@ export class InvalidWhitelistType extends Error {
   }
 }
 
-export class MaxObjectsExceeded extends Error {
+export class GemStillHasObjects extends Error {
   readonly code = 6008
+  readonly name = "GemStillHasObjects"
+  readonly msg = "Remove all the objects before unstaking."
+
+  constructor() {
+    super("6008: Remove all the objects before unstaking.")
+  }
+}
+
+export class ObjectNotFound extends Error {
+  readonly code = 6009
+  readonly name = "ObjectNotFound"
+  readonly msg = "Object not found."
+
+  constructor() {
+    super("6009: Object not found.")
+  }
+}
+
+export class MaxObjectsExceeded extends Error {
+  readonly code = 6010
   readonly name = "MaxObjectsExceeded"
   readonly msg = "Maximum number of objects exceeded."
 
   constructor() {
-    super("6008: Maximum number of objects exceeded.")
+    super("6010: Maximum number of objects exceeded.")
   }
 }
 
 export class ArithmeticError extends Error {
-  readonly code = 6009
+  readonly code = 6011
   readonly name = "ArithmeticError"
   readonly msg = "An arithmetic error occurred."
 
   constructor() {
-    super("6009: An arithmetic error occurred.")
+    super("6011: An arithmetic error occurred.")
   }
 }
 
@@ -129,8 +151,12 @@ export function fromCode(code: number): CustomError | null {
     case 6007:
       return new InvalidWhitelistType()
     case 6008:
-      return new MaxObjectsExceeded()
+      return new GemStillHasObjects()
     case 6009:
+      return new ObjectNotFound()
+    case 6010:
+      return new MaxObjectsExceeded()
+    case 6011:
       return new ArithmeticError()
   }
 

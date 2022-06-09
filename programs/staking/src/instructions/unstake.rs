@@ -31,6 +31,9 @@ pub struct Unstake<'info> {
         mut,
         has_one = farmer,
         has_one = lock,
+        constraint = 
+            stake_receipt.objects.is_empty()
+            @ StakingError::GemStillHasObjects,
         seeds = [
             StakeReceipt::PREFIX,
             farmer.key().as_ref(),
@@ -84,12 +87,11 @@ pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, Unstake<'info>>) -> Result
         .checked_add(ctx.accounts.lock.duration)
         .ok_or(StakingError::ArithmeticError)?;
 
-    let farm = &mut ctx.accounts.farm;
     let receipt = &ctx.accounts.stake_receipt;
 
     require_gte!(now, end_ts, StakingError::GemStillLocked);
 
-    ctx.accounts.farmer.update_accrued_rewards(farm)?;
+    ctx.accounts.farmer.update_accrued_rewards()?;
     ctx.accounts.release_gems(receipt.amount)?;
     ctx.accounts
         .farmer

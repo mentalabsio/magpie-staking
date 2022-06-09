@@ -61,6 +61,10 @@ pub mod staking {
         instructions::add_object::handler(ctx)
     }
 
+    pub fn remove_object(ctx: Context<RemoveObject>) -> Result<()> {
+        instructions::remove_object::handler(ctx)
+    }
+
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
         instructions::claim_rewards::handler(ctx)
     }

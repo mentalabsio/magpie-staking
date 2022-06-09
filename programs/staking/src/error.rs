@@ -26,6 +26,12 @@ pub enum StakingError {
     #[msg("Invalid whitelist type.")]
     InvalidWhitelistType,
 
+    #[msg("Remove all the objects before unstaking.")]
+    GemStillHasObjects,
+
+    #[msg("Object not found.")]
+    ObjectNotFound,
+
     #[msg("Maximum number of objects exceeded.")]
     MaxObjectsExceeded,
 

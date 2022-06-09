@@ -32,19 +32,14 @@ impl StakeReceipt {
         self.end_ts.is_none()
     }
 
-    pub fn try_add_object(
-        &mut self,
-        farm: &mut Farm,
-        farmer: &mut Farmer,
-        object: AssociatedObject,
-    ) -> Result<()> {
+    pub fn try_add_object(&mut self, farmer: &mut Farmer, object: AssociatedObject) -> Result<()> {
         require_gt!(
             3_usize,
             self.objects.len(),
             StakingError::MaxObjectsExceeded
         );
 
-        farmer.update_accrued_rewards(farm)?;
+        farmer.update_accrued_rewards()?;
 
         let rate = object.rate;
         self.objects.push(object);
@@ -57,6 +52,27 @@ impl StakeReceipt {
 
         // Update farmer reward_rate;
         farmer.increase_reward_rate(rate)?;
+
+        Ok(())
+    }
+
+    pub fn try_remove_object(&mut self, farmer: &mut Farmer, obj_key: Pubkey) -> Result<()> {
+        let idx = self
+            .objects
+            .iter()
+            .position(|o| o.key == obj_key)
+            .ok_or(StakingError::ObjectNotFound)?;
+
+        let object = self.objects.swap_remove(idx);
+
+        farmer.update_accrued_rewards()?;
+
+        self.reward_rate = self
+            .reward_rate
+            .checked_sub(object.rate)
+            .ok_or(StakingError::ArithmeticError)?;
+
+        farmer.decrease_reward_rate(object.rate)?;
 
         Ok(())
     }

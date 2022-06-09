@@ -55,7 +55,7 @@ impl<'info> ClaimRewards<'info> {
 }
 
 pub fn handler(ctx: Context<ClaimRewards>) -> Result<()> {
-    let reward = ctx.accounts.farmer.claim_accrued(&mut ctx.accounts.farm)?;
+    let reward = ctx.accounts.farmer.claim_accrued()?;
 
     ctx.accounts.transfer_reward(reward)?;
 

@@ -58,10 +58,6 @@ describe("magpie-staking", () => {
   // NFTs that will be staked.
   const nft = new PublicKey("SaCd2fYycnD2wcUJWZNfF2xGAVvcUaVeTnEz7MUibm5");
 
-  // const otherNft = new PublicKey(
-  //   "F8DBPPFwjddGdqs4EXdJTj3xqC8NE8FzUEzYQfMXt8Rs"
-  // );
-
   // Whitelisted creator address.
   const creatorAddress = new PublicKey(
     "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs"
@@ -363,6 +359,32 @@ describe("magpie-staking", () => {
     expect(receiptAccount.objects.length).to.equal(1);
     expect(receiptAccount.objects.some(o => o.key.equals(objectMint))).to.be
       .true;
+  });
+
+  it("should be able to remove an object", async () => {
+    const farm = findFarmAddress({
+      authority: farmAuthority.publicKey,
+      rewardMint,
+    });
+
+    const { ix } = await stakingClient.createRemoveObjectInstruction({
+      farm,
+      mint: nft,
+      object: objectMint,
+      owner: userWallet.publicKey,
+    });
+
+    await send(connection, [ix], [userWallet]);
+
+    const farmer = findFarmerAddress({ farm, owner: userWallet.publicKey });
+    const receipt = findStakeReceiptAddress({ farmer, mint: nft });
+
+    const receiptAccount = await StakeReceipt.fetch(connection, receipt);
+
+    expect(receiptAccount.rewardRate.toNumber()).to.equal(100);
+    expect(receiptAccount.objects.length).to.equal(0);
+    expect(receiptAccount.objects.some(o => o.key.equals(objectMint))).to.be
+      .false;
   });
 
   it("should be able to unstake an NFT", async () => {

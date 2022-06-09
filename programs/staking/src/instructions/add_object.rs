@@ -24,6 +24,7 @@ pub struct AddObject<'info> {
     )]
     pub farmer: Account<'info, Farmer>,
 
+    #[account(address = receipt.mint)]
     pub mint: Account<'info, Mint>,
 
     #[account(
@@ -94,7 +95,6 @@ impl<'info> AddObject<'info> {
 pub fn handler(ctx: Context<AddObject>) -> Result<()> {
     ctx.accounts.lock_object()?;
 
-    let farm = &mut ctx.accounts.farm;
     let farmer = &mut ctx.accounts.farmer;
     let obj_key = ctx.accounts.object.key();
     let obj_rate = ctx.accounts.object_whitelist.reward_rate;
@@ -104,7 +104,7 @@ pub fn handler(ctx: Context<AddObject>) -> Result<()> {
         rate: obj_rate,
     };
 
-    ctx.accounts.receipt.try_add_object(farm, farmer, object)?;
+    ctx.accounts.receipt.try_add_object(farmer, object)?;
 
     Ok(())
 }

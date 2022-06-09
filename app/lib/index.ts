@@ -17,6 +17,7 @@ import {
   fundReward,
   initializeFarmer,
   removeFromWhitelist,
+  removeObject,
   stake,
   StakeArgs,
   unstake,
@@ -92,6 +93,13 @@ interface IUnstake {
 }
 
 interface IAddObject {
+  farm: PublicKey;
+  mint: PublicKey;
+  object: PublicKey;
+  owner: PublicKey;
+}
+
+interface IRemoveObject {
   farm: PublicKey;
   mint: PublicKey;
   object: PublicKey;
@@ -452,7 +460,7 @@ export const StakingProgram = (connection: Connection) => {
 
     const { creatorAddress, metadataAddress } = await tryFindCreator(
       connection,
-      object,
+      object
     );
 
     const objectWhitelist = findWhitelistProofAddress({
@@ -465,7 +473,10 @@ export const StakingProgram = (connection: Connection) => {
       owner: farmer,
     });
 
-    const userObjectAta = await utils.token.associatedAddress({ mint: object, owner });
+    const userObjectAta = await utils.token.associatedAddress({
+      mint: object,
+      owner,
+    });
 
     const ix = addObject({
       farm,
@@ -490,6 +501,40 @@ export const StakingProgram = (connection: Connection) => {
     return { ix };
   };
 
+  const createRemoveObjectInstruction = async ({
+    owner,
+    object,
+    mint,
+    farm,
+  }: IRemoveObject) => {
+    const farmer = findFarmerAddress({ farm, owner });
+    const receipt = findStakeReceiptAddress({ farmer, mint });
+
+    const userObjectAta = await utils.token.associatedAddress({
+      mint: object,
+      owner,
+    });
+
+    const objectVault = await utils.token.associatedAddress({
+      mint: object,
+      owner: farmer,
+    });
+
+    const ix = removeObject({
+      farm,
+      mint,
+      object,
+      owner,
+      tokenProgram,
+      farmer,
+      objectVault,
+      userObjectAta,
+      receipt,
+    });
+
+    return { ix };
+  };
+
   return {
     // Admin-domain
     createFarmInstruction,
@@ -505,5 +550,6 @@ export const StakingProgram = (connection: Connection) => {
     createStakeInstruction,
     createUnstakeInstruction,
     createAddObjectInstruction,
+    createRemoveObjectInstruction,
   };
 };

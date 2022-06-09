@@ -142,7 +142,7 @@ pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, Stake<'info>>, amount: u64
 
     let reserved_amount = reward_rate as u64 * ctx.accounts.lock.duration;
 
-    ctx.accounts.farmer.update_accrued_rewards(farm)?;
+    ctx.accounts.farmer.update_accrued_rewards()?;
 
     // Check if the farm can afford this new stake.
     farm.reward.try_reserve(reserved_amount)?;

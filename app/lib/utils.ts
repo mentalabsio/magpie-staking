@@ -106,6 +106,8 @@ export function withParsedError<T, U>(
     } catch (e) {
       const parsed = fromTxError(e);
 
+      // console.log(e.logs);
+
       if (parsed != null) {
         throw parsed;
       }
