@@ -11,11 +11,11 @@ import { getNFTMetadata } from "utils/nfts";
 import { NFT } from "./useWalletNFTs";
 
 const farmAuthorityPubKey = new web3.PublicKey(
-  "3QnUajwhiaj1vgkZwypWetV4bZYhKLATqzQfmbbnE7gf"
+  "C6dPcdtvWP52Hz66FCojG1HqmoeWntPzA6HbXJrXnRqW"
 );
 
 const rewardMint = new web3.PublicKey(
-  "ELdy8TG1argYvWrJXrt48a1tVh5Fg3oSSXzBKz9jQAdE"
+  "Hd6Ma5Q1z1vy82WXAXv9kfMHf2iRcpucrhP6eB8rgX49"
 );
 
 export type StakeReceiptWithMetadata = StakeReceipt & {
@@ -241,6 +241,72 @@ const useStaking = () => {
     setFeedbackStatus("Success!");
   };
 
+  const addObject = async (mint: web3.PublicKey, object: web3.PublicKey) => {
+    const farm = findFarmAddress({
+      authority: farmAuthorityPubKey,
+      rewardMint,
+    });
+
+    const stakingClient = StakingProgram(connection);
+
+    const { ix } = await stakingClient.createAddObjectInstruction({
+      farm,
+      mint,
+      object,
+      owner: publicKey,
+    });
+
+    const tx = new Transaction();
+
+    tx.add(ix);
+    const latest = await connection.getLatestBlockhash();
+    tx.recentBlockhash = latest.blockhash;
+    tx.feePayer = publicKey;
+
+    setFeedbackStatus("Awaiting approval...");
+
+    const txid = await sendTransaction(tx, connection);
+
+    setFeedbackStatus("Confirming...");
+
+    await connection.confirmTransaction(txid);
+
+    setFeedbackStatus("Success!");
+  };
+
+  const removeObject = async (mint: web3.PublicKey, object: web3.PublicKey) => {
+    const farm = findFarmAddress({
+      authority: farmAuthorityPubKey,
+      rewardMint,
+    });
+
+    const stakingClient = StakingProgram(connection);
+
+    const { ix } = await stakingClient.createRemoveObjectInstruction({
+      farm,
+      mint,
+      object,
+      owner: publicKey,
+    });
+
+    const tx = new Transaction();
+
+    tx.add(ix);
+    const latest = await connection.getLatestBlockhash();
+    tx.recentBlockhash = latest.blockhash;
+    tx.feePayer = publicKey;
+
+    setFeedbackStatus("Awaiting approval...");
+
+    const txid = await sendTransaction(tx, connection);
+
+    setFeedbackStatus("Confirming...");
+
+    await connection.confirmTransaction(txid);
+
+    setFeedbackStatus("Success!");
+  };
+
   return {
     farmerAccount,
     feedbackStatus,
@@ -250,6 +316,8 @@ const useStaking = () => {
     stakeReceipts,
     unstake,
     fetchReceipts,
+    addObject,
+    removeObject,
   };
 };
 

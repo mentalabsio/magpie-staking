@@ -12,6 +12,7 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import NFTSelectInput from "@/components/NFTSelectInput/NFTSelectInput";
 import useStaking from "@/hooks/useStaking";
 import { LoadingIcon } from "@/components/icons/LoadingIcon";
+import { web3 } from "@project-serum/anchor";
 
 export default function Home() {
   const { walletNFTs, fetchNFTs } = useWalletNFTs([
@@ -32,6 +33,8 @@ export default function Home() {
     stakeReceipts,
     feedbackStatus,
     unstake,
+    addObject,
+    removeObject,
     fetchReceipts,
   } = useStaking();
 
@@ -43,10 +46,7 @@ export default function Home() {
     const mint = data.get("mint");
     const mainMint = data.get("main_mint");
 
-    // await stakeAssociated(
-    //   new web3.PublicKey(mint),
-    //   new web3.PublicKey(mainMint)
-    // );
+    await addObject(new web3.PublicKey(mainMint), new web3.PublicKey(mint));
     await fetchAssociatedNFTs();
     // await fetchProgress();
   };
@@ -370,10 +370,10 @@ export default function Home() {
                                       <Button
                                         onClick={async () => {
                                           /** Remove object */
-                                          // await unstakeAssociated(
-                                          //   object.mint,
-                                          //   stake.mainNft.mint
-                                          // );
+                                          await removeObject(
+                                            stake.mint,
+                                            object.key
+                                          );
                                           // await fetchProgress();
                                           await fetchAssociatedNFTs();
                                         }}
