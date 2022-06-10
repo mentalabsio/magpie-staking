@@ -2,13 +2,13 @@
 seeds = false
 
 [programs.localnet]
-staking = "3LrsNgisAKcHHdqhaea7b34TrhNBFVdT8gt7zBCCBngi"
+staking = "8Lk9MeBT1PhsthrhUbuuUXbatHBxQACzwDSCXgGzTVF1"
 
 [registry]
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/anchor.json"
 
 [scripts]
