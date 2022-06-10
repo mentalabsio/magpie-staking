@@ -15,7 +15,7 @@ const Header = () => {
         position: "sticky",
         top: 0,
         zIndex: 9,
-        backgroundColor: "rgba(209, 213, 218, 0.6)",
+        background: theme => "hsla(0,0%,100%,.76)",
         borderBottom: "1px solid",
         backdropFilter: "blur(5px)",
         borderColor: "background2",
@@ -39,13 +39,15 @@ const Header = () => {
                 padding: "1.6rem 0",
               }}
             >
-              <img
-                sx={{
-                  maxWidth: "9.6rem",
-                }}
-                src="https://uploads-ssl.webflow.com/61b843f68cc9ce09b38de69f/61b878c9fc12b52c77cea8eb_nav-logo.png"
-              />
-              {/* <Flex sx={{ alignItems: "center" }}>Staking</Flex> */}
+              <Flex sx={{ alignItems: "center" }}>
+                <img
+                  sx={{
+                    maxHeight: "4.8rem",
+                  }}
+                  src="/MagpieLogo.png"
+                  alt="Magpie"
+                />
+              </Flex>
             </Flex>
           </Link>
 
@@ -101,6 +103,7 @@ const Header = () => {
                 padding: "1.6rem",
                 height: "8rem",
                 alignItems: "center",
+
                 ...(!isMobileMenuActive && { display: "none" }),
               }}
             >
