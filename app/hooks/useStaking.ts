@@ -45,12 +45,12 @@ const useStaking = () => {
       const receipts = await findUserStakeReceipts(connection, farm, publicKey);
 
       const stakingReceipts = receipts.filter(
-        (receipt) => receipt.endTs === null
+        receipt => receipt.endTs === null
       );
 
       setFeedbackStatus("Fetching metadatas...");
       const withMetadatas = await Promise.all(
-        stakingReceipts.map(async (receipt) => {
+        stakingReceipts.map(async receipt => {
           const metadata = await getNFTMetadata(
             receipt.mint.toString(),
             connection
@@ -135,13 +135,13 @@ const useStaking = () => {
 
       setFeedbackStatus("Initializing...");
       const locks = await findFarmLocks(connection, farm);
-      const lock = locks.find((lock) => lock.bonusFactor === 0);
+      const lock = locks.find(lock => lock.bonusFactor === 0);
 
       const stakingClient = StakingProgram(connection);
 
       let additionals = [];
       const ixs = await Promise.all(
-        mints.map(async (mint) => {
+        mints.map(async mint => {
           const { ix } = await stakingClient.createStakeInstruction({
             farm,
             mint,
@@ -211,80 +211,6 @@ const useStaking = () => {
     await connection.confirmTransaction(txid);
   };
 
-  const buffPair = async (
-    nftA: web3.PublicKey,
-    nftB: web3.PublicKey,
-    buffMint: web3.PublicKey
-  ) => {
-    const farm = findFarmAddress({
-      authority: farmAuthorityPubKey,
-      rewardMint,
-    });
-
-    const stakingClient = StakingProgram(connection);
-
-    const { ix } = await stakingClient.createBuffPairInstruction({
-      farm,
-      buffMint,
-      pair: [nftA, nftB],
-      authority: publicKey,
-    });
-
-    const tx = new Transaction();
-
-    tx.add(ix);
-    const latest = await connection.getLatestBlockhash();
-    tx.recentBlockhash = latest.blockhash;
-    tx.feePayer = publicKey;
-
-    setFeedbackStatus("Awaiting approval...");
-
-    const txid = await sendTransaction(tx, connection);
-
-    setFeedbackStatus("Confirming...");
-
-    await connection.confirmTransaction(txid);
-
-    setFeedbackStatus("Success!");
-  };
-
-  const debuffPair = async (
-    nftA: web3.PublicKey,
-    nftB: web3.PublicKey,
-    buffMint: web3.PublicKey
-  ) => {
-    const farm = findFarmAddress({
-      authority: farmAuthorityPubKey,
-      rewardMint,
-    });
-
-    const stakingClient = StakingProgram(connection);
-
-    const { ix } = await stakingClient.createDebuffPairInstruction({
-      farm,
-      buffMint,
-      pair: [nftA, nftB],
-      authority: publicKey,
-    });
-
-    const tx = new Transaction();
-
-    tx.add(ix);
-    const latest = await connection.getLatestBlockhash();
-    tx.recentBlockhash = latest.blockhash;
-    tx.feePayer = publicKey;
-
-    setFeedbackStatus("Awaiting approval...");
-
-    const txid = await sendTransaction(tx, connection);
-
-    setFeedbackStatus("Confirming...");
-
-    await connection.confirmTransaction(txid);
-
-    setFeedbackStatus("Success!");
-  };
-
   const claim = async () => {
     const farm = findFarmAddress({
       authority: farmAuthorityPubKey,
@@ -324,8 +250,6 @@ const useStaking = () => {
     stakeReceipts,
     unstake,
     fetchReceipts,
-    buffPair,
-    debuffPair,
   };
 };
 
