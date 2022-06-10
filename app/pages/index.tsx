@@ -15,7 +15,7 @@ import { LoadingIcon } from "@/components/icons/LoadingIcon";
 
 export default function Home() {
   const { walletNFTs, fetchNFTs } = useWalletNFTs([
-    "9UaTjLVUTtJF3n9sG8VfvYt4pdYGf7Y59qYZFBRx4kLo",
+    "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs",
   ]);
   const { walletNFTs: associatedNFTs, fetchNFTs: fetchAssociatedNFTs } =
     useWalletNFTs(process.env.NEXT_PUBLIC_ASSOCIATED_CREATORS.split(","));
@@ -106,7 +106,6 @@ export default function Home() {
         sx={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
           alignItems: "center",
           alignSelf: "stretch",
           margin: "0 auto",
@@ -114,6 +113,7 @@ export default function Home() {
           maxWidth: "64rem",
           position: "relative",
           padding: "0 1.6rem",
+          minHeight: "60vh",
         }}
       >
         <Heading mb=".8rem" variant="heading1">
@@ -121,138 +121,149 @@ export default function Home() {
         </Heading>
         <Text>Stake your Magpie now</Text>
 
-        <Flex
-          my="3.2rem"
-          sx={{
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "1.6rem",
-          }}
-        >
-          <Flex
-            sx={{
-              gap: "1.6rem",
-            }}
-          >
-            {/* {progress?.totalAccrued?.toNumber() ? (
+        {farmerAccount === false ? (
+          <Button mt="3.2rem" onClick={initFarmer}>
+            Init farmer
+          </Button>
+        ) : null}
+
+        {farmerAccount ? (
+          <>
+            <Flex
+              my="3.2rem"
+              sx={{
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "1.6rem",
+              }}
+            >
+              <Flex
+                sx={{
+                  gap: "1.6rem",
+                }}
+              >
+                {/* {progress?.totalAccrued?.toNumber() ? (
               <Text>
                 Accrued rewards:{" "}
                 {progress?.totalAccrued?.toNumber() / 100000000}
               </Text>
             ) : null} */}
 
-            {/* <Text>
+                {/* <Text>
               Rate: {progress?.totalRewardRate?.toNumber() / 1000000000}
             </Text> */}
-          </Flex>
-          <Button onClick={claim}>Claim rewards</Button>
+              </Flex>
+              <Button onClick={claim}>Claim rewards</Button>
 
-          <Flex
-            sx={{
-              alignItems: "center",
-              gap: ".8rem",
-              margin: ".8rem 0",
-            }}
-          >
-            {feedbackStatus ? (
-              <>
-                {feedbackStatus.indexOf("Success") === -1 ? (
-                  <LoadingIcon size="1.6rem" />
-                ) : null}
-                {"  "}{" "}
-                <Text
-                  variant="small"
-                  sx={{
-                    color:
-                      feedbackStatus.indexOf("Success") !== -1
-                        ? "success"
-                        : "text",
-                  }}
-                >
-                  {feedbackStatus}
-                </Text>
-              </>
-            ) : (
-              ""
-            )}
-            &nbsp;
-          </Flex>
-        </Flex>
-
-        <Flex
-          my="3.2rem"
-          sx={{
-            flexDirection: "column",
-            gap: "1.6rem",
-            alignSelf: "stretch",
-          }}
-        >
-          <Tabs
-            sx={{
-              margin: "3.2rem 0",
-              alignSelf: "stretch",
-              minHeight: "48rem",
-            }}
-          >
-            <TabList>
-              <Tab>Your wallet</Tab>
-              <Tab>Your vault</Tab>
-            </TabList>
-
-            <TabPanel>
-              <NFTGallery NFTs={walletNFTs}>
-                <>
-                  {walletNFTs?.map(item => {
-                    const isSelected = selectedWalletItems.find(
-                      NFT =>
-                        NFT.onchainMetadata.mint === item.onchainMetadata.mint
-                    );
-
-                    return (
-                      <Flex
-                        sx={{
-                          flexDirection: "column",
-                          alignItems: "center",
-                          gap: "1.6rem",
-                        }}
-                      >
-                        <CollectionItem
-                          key={item.onchainMetadata.mint}
-                          item={item}
-                          onClick={handleWalletItemClick}
-                          sx={{
-                            maxWidth: "16rem",
-                            "> img": {
-                              border: "3px solid transparent",
-                              borderColor: isSelected
-                                ? "primary"
-                                : "transparent",
-                            },
-                          }}
-                        />
-                      </Flex>
-                    );
-                  })}
-                </>
-              </NFTGallery>
-              <Button
+              <Flex
                 sx={{
-                  margin: "3.2rem auto",
+                  alignItems: "center",
+                  gap: ".8rem",
+                  margin: ".8rem 0",
                 }}
-                onClick={async e => {
-                  const allMints = selectedWalletItems.map(item => item.mint);
-                  await stakeAll(allMints);
-                  await fetchNFTs();
-                  // await fetchProgress();
-                }}
-                disabled={!selectedWalletItems.length}
               >
-                Stake selected
-              </Button>
-            </TabPanel>
+                {feedbackStatus ? (
+                  <>
+                    {feedbackStatus.indexOf("Success") === -1 ? (
+                      <LoadingIcon size="1.6rem" />
+                    ) : null}
+                    {"  "}{" "}
+                    <Text
+                      variant="small"
+                      sx={{
+                        color:
+                          feedbackStatus.indexOf("Success") !== -1
+                            ? "success"
+                            : "text",
+                      }}
+                    >
+                      {feedbackStatus}
+                    </Text>
+                  </>
+                ) : (
+                  ""
+                )}
+                &nbsp;
+              </Flex>
+            </Flex>
 
-            <TabPanel>
-              {/* <Button
+            <Flex
+              my="3.2rem"
+              sx={{
+                flexDirection: "column",
+                gap: "1.6rem",
+                alignSelf: "stretch",
+              }}
+            >
+              <Tabs
+                sx={{
+                  margin: "3.2rem 0",
+                  alignSelf: "stretch",
+                  minHeight: "48rem",
+                }}
+              >
+                <TabList>
+                  <Tab>Your wallet</Tab>
+                  <Tab>Your vault</Tab>
+                </TabList>
+
+                <TabPanel>
+                  <NFTGallery NFTs={walletNFTs}>
+                    <>
+                      {walletNFTs?.map(item => {
+                        const isSelected = selectedWalletItems.find(
+                          NFT =>
+                            NFT.onchainMetadata.mint ===
+                            item.onchainMetadata.mint
+                        );
+
+                        return (
+                          <Flex
+                            sx={{
+                              flexDirection: "column",
+                              alignItems: "center",
+                              gap: "1.6rem",
+                            }}
+                          >
+                            <CollectionItem
+                              key={item.onchainMetadata.mint}
+                              item={item}
+                              onClick={handleWalletItemClick}
+                              sx={{
+                                maxWidth: "16rem",
+                                "> img": {
+                                  border: "3px solid transparent",
+                                  borderColor: isSelected
+                                    ? "primary"
+                                    : "transparent",
+                                },
+                              }}
+                            />
+                          </Flex>
+                        );
+                      })}
+                    </>
+                  </NFTGallery>
+                  <Button
+                    sx={{
+                      margin: "3.2rem auto",
+                    }}
+                    onClick={async e => {
+                      const allMints = selectedWalletItems.map(
+                        item => item.mint
+                      );
+                      await stakeAll(allMints);
+                      await fetchNFTs();
+                      // await fetchProgress();
+                    }}
+                    disabled={!selectedWalletItems.length}
+                  >
+                    Stake selected
+                  </Button>
+                </TabPanel>
+
+                <TabPanel>
+                  {/* <Button
                 onClick={async () => {
                   await stakeAssociated()
                   await fetchNFTs()
@@ -271,138 +282,65 @@ export default function Home() {
                 unstake associated
               </Button> */}
 
-              <Flex
-                sx={{
-                  flexDirection: "column",
-                  gap: "3.2rem",
-                }}
-              >
-                {stakeReceipts &&
-                  stakeReceipts.map(stake => {
-                    const isAdding =
-                      isAddingAssociated &&
-                      isAddingAssociated === stake.mint.toString();
+                  <Flex
+                    sx={{
+                      flexDirection: "column",
+                      gap: "3.2rem",
+                    }}
+                  >
+                    {stakeReceipts &&
+                      stakeReceipts.map(stake => {
+                        const isAdding =
+                          isAddingAssociated &&
+                          isAddingAssociated === stake.mint.toString();
 
-                    return (
-                      <Flex
-                        key={stake.mint?.toString()}
-                        sx={{
-                          alignItems: "center",
-                          gap: "1.6rem",
-                          background: "background",
-                          padding: "1.6rem 3.2rem",
-                          borderRadius: ".4rem",
-                          flexDirection: "column",
-                          "@media (min-width:768px)": {
-                            flexDirection: "row",
-                          },
-                        }}
-                      >
-                        <Flex
-                          sx={{
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: "1.6rem",
-                            "@media (min-width:768px)": {
-                              marginRight: "3.2rem",
-                            },
-                          }}
-                        >
-                          <CollectionItem item={stake.metadata} />
+                        return (
                           <Flex
+                            key={stake.mint?.toString()}
                             sx={{
-                              gap: "1.6rem",
                               alignItems: "center",
+                              gap: "1.6rem",
+                              background: "background",
+                              padding: "1.6rem 3.2rem",
+                              borderRadius: ".4rem",
+                              flexDirection: "column",
+                              "@media (min-width:768px)": {
+                                flexDirection: "row",
+                              },
                             }}
                           >
-                            <Button
-                              variant="secondary"
-                              onClick={async () => {
-                                await unstake(stake.mint);
-                                await fetchNFTs();
-                                // await fetchProgress();
+                            <Flex
+                              sx={{
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: "1.6rem",
+                                "@media (min-width:768px)": {
+                                  marginRight: "3.2rem",
+                                },
                               }}
                             >
-                              Unstake
-                            </Button>
-                          </Flex>
-                        </Flex>
-
-                        <Flex
-                          sx={{
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: "1.6rem",
-                          }}
-                        >
-                          <Flex
-                            sx={{
-                              gap: "1.6rem",
-                            }}
-                          >
-                            {stake.objects.map(object =>
-                              object ? (
-                                <Flex
-                                  key={object.key.toString()}
-                                  sx={{
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    gap: "1.6rem",
+                              <CollectionItem item={stake.metadata} />
+                              <Flex
+                                sx={{
+                                  gap: "1.6rem",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Button
+                                  variant="secondary"
+                                  onClick={async () => {
+                                    await unstake(stake.mint);
+                                    await fetchNFTs();
+                                    // await fetchProgress();
                                   }}
                                 >
-                                  {/* <CollectionItem
-                                    item={object}
-                                    sx={{
-                                      maxWidth: "8rem",
-                                    }}
-                                  /> */}
-                                  <Button
-                                    onClick={async () => {
-                                      /** Remove object */
-                                      // await unstakeAssociated(
-                                      //   object.mint,
-                                      //   stake.mainNft.mint
-                                      // );
-                                      // await fetchProgress();
-                                      await fetchAssociatedNFTs();
-                                    }}
-                                  >
-                                    Withdraw
-                                  </Button>
-                                </Flex>
-                              ) : null
-                            )}
-                          </Flex>
-                        </Flex>
+                                  Unstake
+                                </Button>
+                              </Flex>
+                            </Flex>
 
-                        <Flex
-                          sx={{
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: "1.6rem",
-
-                            "@media (min-width:768px)": {
-                              marginLeft: "3.2rem",
-                            },
-                          }}
-                        >
-                          <Button
-                            variant="resetted"
-                            onClick={() =>
-                              setIsAddingAssociated(prev =>
-                                prev ? false : stake.mint.toString()
-                              )
-                            }
-                          >
-                            {isAdding ? null : "+"} Add
-                            {isAdding ? "ing" : null} a Shiny Thing
-                          </Button>
-
-                          {isAdding ? (
-                            <form
-                              onSubmit={handleAssociatedFormSubmit}
+                            <Flex
                               sx={{
-                                display: "flex",
                                 flexDirection: "column",
                                 alignItems: "center",
                                 gap: "1.6rem",
@@ -413,35 +351,108 @@ export default function Home() {
                                   gap: "1.6rem",
                                 }}
                               >
-                                <input
-                                  type="hidden"
-                                  name="main_mint"
-                                  value={stake.mint.toString()}
-                                />
-                                <NFTSelectInput
-                                  name="mint"
-                                  NFTs={associatedNFTs}
-                                  label="Select a Shiny Thing"
-                                />
+                                {stake.objects.map(object =>
+                                  object ? (
+                                    <Flex
+                                      key={object.key.toString()}
+                                      sx={{
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        gap: "1.6rem",
+                                      }}
+                                    >
+                                      {/* <CollectionItem
+                                    item={object}
+                                    sx={{
+                                      maxWidth: "8rem",
+                                    }}
+                                  /> */}
+                                      <Button
+                                        onClick={async () => {
+                                          /** Remove object */
+                                          // await unstakeAssociated(
+                                          //   object.mint,
+                                          //   stake.mainNft.mint
+                                          // );
+                                          // await fetchProgress();
+                                          await fetchAssociatedNFTs();
+                                        }}
+                                      >
+                                        Withdraw
+                                      </Button>
+                                    </Flex>
+                                  ) : null
+                                )}
                               </Flex>
-                              <Flex
-                                sx={{
-                                  gap: "1.6rem",
-                                }}
-                              >
-                                <Button type="submit">Add Thing</Button>
-                              </Flex>
-                            </form>
-                          ) : null}
-                        </Flex>
-                      </Flex>
-                    );
-                  })}
-              </Flex>
-            </TabPanel>
-          </Tabs>
+                            </Flex>
 
-          {/* <Flex
+                            <Flex
+                              sx={{
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: "1.6rem",
+
+                                "@media (min-width:768px)": {
+                                  marginLeft: "3.2rem",
+                                },
+                              }}
+                            >
+                              <Button
+                                variant="resetted"
+                                onClick={() =>
+                                  setIsAddingAssociated(prev =>
+                                    prev ? false : stake.mint.toString()
+                                  )
+                                }
+                              >
+                                {isAdding ? null : "+"} Add
+                                {isAdding ? "ing" : null} a Shiny Thing
+                              </Button>
+
+                              {isAdding ? (
+                                <form
+                                  onSubmit={handleAssociatedFormSubmit}
+                                  sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    gap: "1.6rem",
+                                  }}
+                                >
+                                  <Flex
+                                    sx={{
+                                      gap: "1.6rem",
+                                    }}
+                                  >
+                                    <input
+                                      type="hidden"
+                                      name="main_mint"
+                                      value={stake.mint.toString()}
+                                    />
+                                    <NFTSelectInput
+                                      name="mint"
+                                      NFTs={associatedNFTs}
+                                      label="Select a Shiny Thing"
+                                    />
+                                  </Flex>
+                                  <Flex
+                                    sx={{
+                                      gap: "1.6rem",
+                                    }}
+                                  >
+                                    <Button type="submit">Add Thing</Button>
+                                  </Flex>
+                                </form>
+                              ) : null}
+                            </Flex>
+                          </Flex>
+                        );
+                      })}
+                  </Flex>
+                </TabPanel>
+              </Tabs>
+
+              {/* <Flex
             sx={{
               flexDirection: "column",
               gap: ".8rem",
@@ -450,7 +461,9 @@ export default function Home() {
             <Heading variant="heading3">NFT Selector:</Heading>
             <NFTSelectInput name="nft" NFTs={walletNFTs} />
           </Flex> */}
-        </Flex>
+            </Flex>
+          </>
+        ) : null}
       </main>
 
       <footer
@@ -459,10 +472,10 @@ export default function Home() {
           justifyContent: "center",
           alignItems: "center",
           margin: "4rem 0",
+          // marginTop: "32rem",
           position: "relative",
         }}
       >
-        Powered by{" "}
         <a
           href="https://twitter.com/magicshards"
           target="_blank"
@@ -487,7 +500,6 @@ export default function Home() {
               alt="Magic Shards"
               height={32}
             />
-            MagicShards
           </Text>
         </a>
       </footer>
