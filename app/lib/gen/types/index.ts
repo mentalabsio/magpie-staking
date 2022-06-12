@@ -1,12 +1,8 @@
 import * as WhitelistType from "./WhitelistType"
 
-export { LockConfig, LockConfigFields, LockConfigJSON } from "./LockConfig"
-export { Reward, RewardFields, RewardJSON } from "./Reward"
-export {
-  AssociatedObject,
-  AssociatedObjectFields,
-  AssociatedObjectJSON,
-} from "./AssociatedObject"
+export { LockConfig } from "./LockConfig"
+export { Reward } from "./Reward"
+export { AssociatedObject } from "./AssociatedObject"
 export { WhitelistType }
 
 export type WhitelistTypeKind =

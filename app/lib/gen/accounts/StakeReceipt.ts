@@ -3,6 +3,10 @@ import BN from "bn.js" // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as borsh from "@project-serum/borsh" // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as types from "../types" // eslint-disable-line @typescript-eslint/no-unused-vars
 import { PROGRAM_ID } from "../programId"
+import {
+  AssociatedObjectFields,
+  AssociatedObjectJSON,
+} from "../types/AssociatedObject"
 
 export interface StakeReceiptFields {
   farmer: PublicKey
@@ -12,7 +16,7 @@ export interface StakeReceiptFields {
   endTs: BN | null
   amount: BN
   rewardRate: BN
-  objects: Array<types.AssociatedObjectFields>
+  objects: Array<AssociatedObjectFields>
 }
 
 export interface StakeReceiptJSON {
@@ -23,7 +27,7 @@ export interface StakeReceiptJSON {
   endTs: string | null
   amount: string
   rewardRate: string
-  objects: Array<types.AssociatedObjectJSON>
+  objects: Array<AssociatedObjectJSON>
 }
 
 export class StakeReceipt {
