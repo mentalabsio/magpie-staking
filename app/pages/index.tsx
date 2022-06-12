@@ -1,29 +1,30 @@
 /** @jsxImportSource theme-ui */
-import Head from "next/head";
+import Head from "next/head"
 
-import { Button, Flex, Heading, Text } from "@theme-ui/components";
-import { useState } from "react";
+import { Button, Flex, Heading, Text } from "@theme-ui/components"
+import { useState } from "react"
 
-import Header from "@/components/Header/Header";
-import { NFTGallery } from "@/components/NFTGallery/NFTGallery";
-import CollectionItem from "@/components/NFTGallery/CollectionItem";
-import useWalletNFTs, { NFT } from "@/hooks/useWalletNFTs";
-import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
-import NFTSelectInput from "@/components/NFTSelectInput/NFTSelectInput";
-import useStaking from "@/hooks/useStaking";
-import { LoadingIcon } from "@/components/icons/LoadingIcon";
-import { web3 } from "@project-serum/anchor";
+import Header from "@/components/Header/Header"
+import { NFTGallery } from "@/components/NFTGallery/NFTGallery"
+import CollectionItem from "@/components/NFTGallery/CollectionItem"
+import useWalletNFTs, { NFT } from "@/hooks/useWalletNFTs"
+import { Tab, TabList, TabPanel, Tabs } from "react-tabs"
+import NFTSelectInput from "@/components/NFTSelectInput/NFTSelectInput"
+import useStaking from "@/hooks/useStaking"
+import { LoadingIcon } from "@/components/icons/LoadingIcon"
+import { web3 } from "@project-serum/anchor"
 
 export default function Home() {
   const { walletNFTs, fetchNFTs } = useWalletNFTs([
-    "2foGcTHZ2C9c5xQrBopgLyNxQ33rdSxwDXqHJbv34Fvs",
-  ]);
+    "9UaTjLVUTtJF3n9sG8VfvYt4pdYGf7Y59qYZFBRx4kLo",
+  ])
   const { walletNFTs: associatedNFTs, fetchNFTs: fetchAssociatedNFTs } =
-    useWalletNFTs(process.env.NEXT_PUBLIC_ASSOCIATED_CREATORS.split(","));
+    useWalletNFTs(process.env.NEXT_PUBLIC_ASSOCIATED_CREATORS.split(","))
   const [isAddingAssociated, setIsAddingAssociated] = useState<false | string>(
     false
-  );
-  const [selectedWalletItems, setSelectedWalletItems] = useState<NFT[]>([]);
+  )
+
+  const [selectedWalletItems, setSelectedWalletItems] = useState<NFT[]>([])
 
   const {
     farmerAccount,
@@ -36,40 +37,40 @@ export default function Home() {
     addObject,
     removeObject,
     fetchReceipts,
-  } = useStaking();
+  } = useStaking()
 
-  const handleAssociatedFormSubmit = async e => {
-    e.preventDefault();
+  const handleAssociatedFormSubmit = async (e) => {
+    e.preventDefault()
 
-    const data = new FormData(e.currentTarget);
+    const data = new FormData(e.currentTarget)
 
-    const mint = data.get("mint");
-    const mainMint = data.get("main_mint");
+    const mint = data.get("mint")
+    const mainMint = data.get("main_mint")
 
-    await addObject(new web3.PublicKey(mainMint), new web3.PublicKey(mint));
-    await fetchAssociatedNFTs();
+    await addObject(new web3.PublicKey(mainMint), new web3.PublicKey(mint))
+    await fetchAssociatedNFTs()
     // await fetchProgress();
-  };
+  }
 
   /**
    * Handles selected items.
    */
   const handleWalletItemClick = (item: NFT) => {
-    setSelectedWalletItems(prev => {
+    setSelectedWalletItems((prev) => {
       const exists = prev.find(
-        NFT => NFT.onchainMetadata.mint === item.onchainMetadata.mint
-      );
+        (NFT) => NFT.onchainMetadata.mint === item.onchainMetadata.mint
+      )
 
       /** Remove if exists */
       if (exists) {
         return prev.filter(
-          NFT => NFT.onchainMetadata.mint !== item.onchainMetadata.mint
-        );
+          (NFT) => NFT.onchainMetadata.mint !== item.onchainMetadata.mint
+        )
       }
 
-      return prev?.concat(item);
-    });
-  };
+      return prev?.concat(item)
+    })
+  }
 
   return (
     <>
@@ -210,12 +211,12 @@ export default function Home() {
                 <TabPanel>
                   <NFTGallery NFTs={walletNFTs}>
                     <>
-                      {walletNFTs?.map(item => {
+                      {walletNFTs?.map((item) => {
                         const isSelected = selectedWalletItems.find(
-                          NFT =>
+                          (NFT) =>
                             NFT.onchainMetadata.mint ===
                             item.onchainMetadata.mint
-                        );
+                        )
 
                         return (
                           <Flex
@@ -240,7 +241,7 @@ export default function Home() {
                               }}
                             />
                           </Flex>
-                        );
+                        )
                       })}
                     </>
                   </NFTGallery>
@@ -248,12 +249,12 @@ export default function Home() {
                     sx={{
                       margin: "3.2rem auto",
                     }}
-                    onClick={async e => {
+                    onClick={async (e) => {
                       const allMints = selectedWalletItems.map(
-                        item => item.mint
-                      );
-                      await stakeAll(allMints);
-                      await fetchNFTs();
+                        (item) => item.mint
+                      )
+                      await stakeAll(allMints)
+                      await fetchNFTs()
                       // await fetchProgress();
                     }}
                     disabled={!selectedWalletItems.length}
@@ -289,10 +290,10 @@ export default function Home() {
                     }}
                   >
                     {stakeReceipts &&
-                      stakeReceipts.map(stake => {
+                      stakeReceipts.map((stake) => {
                         const isAdding =
                           isAddingAssociated &&
-                          isAddingAssociated === stake.mint.toString();
+                          isAddingAssociated === stake.mint.toString()
 
                         return (
                           <Flex
@@ -329,8 +330,8 @@ export default function Home() {
                                 <Button
                                   variant="secondary"
                                   onClick={async () => {
-                                    await unstake(stake.mint);
-                                    await fetchNFTs();
+                                    await unstake(stake.mint)
+                                    await fetchNFTs()
                                     // await fetchProgress();
                                   }}
                                 >
@@ -351,7 +352,7 @@ export default function Home() {
                                   gap: "1.6rem",
                                 }}
                               >
-                                {stake.objects.map(object =>
+                                {stake.objects.map((object) =>
                                   object ? (
                                     <Flex
                                       key={object.key.toString()}
@@ -373,9 +374,9 @@ export default function Home() {
                                           await removeObject(
                                             stake.mint,
                                             object.key
-                                          );
+                                          )
                                           // await fetchProgress();
-                                          await fetchAssociatedNFTs();
+                                          await fetchAssociatedNFTs()
                                         }}
                                       >
                                         Withdraw
@@ -400,7 +401,7 @@ export default function Home() {
                               <Button
                                 variant="resetted"
                                 onClick={() =>
-                                  setIsAddingAssociated(prev =>
+                                  setIsAddingAssociated((prev) =>
                                     prev ? false : stake.mint.toString()
                                   )
                                 }
@@ -446,7 +447,7 @@ export default function Home() {
                               ) : null}
                             </Flex>
                           </Flex>
-                        );
+                        )
                       })}
                   </Flex>
                 </TabPanel>
@@ -504,5 +505,5 @@ export default function Home() {
         </a>
       </footer>
     </>
-  );
+  )
 }
