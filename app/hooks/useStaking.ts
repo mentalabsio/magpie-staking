@@ -353,6 +353,7 @@ const useStaking = () => {
     feedbackStatus,
     claim,
     initFarmer,
+    fetchFarmer,
     stakeAll,
     stakeReceipts,
     unstake,

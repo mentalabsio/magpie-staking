@@ -38,6 +38,7 @@ export default function Home() {
     feedbackStatus,
     unstake,
     addObject,
+    fetchFarmer,
     removeObject,
     fetchReceipts,
   } = useStaking()
@@ -53,6 +54,7 @@ export default function Home() {
     await addObject(new web3.PublicKey(mainMint), new web3.PublicKey(mint))
     await fetchAssociatedNFTs()
     await fetchReceipts()
+    await fetchFarmer()
   }
 
   /**
@@ -146,16 +148,37 @@ export default function Home() {
                   gap: "1.6rem",
                 }}
               >
-                {/* {progress?.totalAccrued?.toNumber() ? (
-              <Text>
-                Accrued rewards:{" "}
-                {progress?.totalAccrued?.toNumber() / 100000000}
-              </Text>
-            ) : null} */}
+                {/* {farmerAccount.accruedRewards.toNumber() ? (
+                  <Text>
+                    Rewards:{" "}
+                    <b
+                      sx={{
+                        fontSize: "1.6rem",
+                      }}
+                    >
+                      {(
+                        farmerAccount.accruedRewards.toNumber() / 1000000
+                      ).toFixed(2)}
+                    </b>
+                  </Text>
+                ) : null} */}
 
-                {/* <Text>
-              Rate: {progress?.totalRewardRate?.toNumber() / 1000000000}
-            </Text> */}
+                {/* {farmerAccount?.totalRewardRate?.toNumber() ? (
+                  <Text>
+                    Rate:{" "}
+                    <b
+                      sx={{
+                        fontSize: "1.6rem",
+                      }}
+                    >
+                      {(
+                        (farmerAccount?.totalRewardRate?.toNumber() / 1000000) *
+                        86400
+                      ).toFixed(2)}{" "}
+                    </b>
+                    per day
+                  </Text>
+                ) : null} */}
               </Flex>
               <Button onClick={claim}>Claim rewards</Button>
 
