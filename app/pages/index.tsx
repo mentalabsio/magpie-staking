@@ -77,6 +77,12 @@ export default function Home() {
     })
   }
 
+  const orderedReceipts =
+    stakeReceipts &&
+    stakeReceipts.sort((a, b) =>
+      a.startTs.toNumber() < b.startTs.toNumber() ? 1 : -1
+    )
+
   return (
     <>
       <Head>
@@ -333,8 +339,8 @@ export default function Home() {
                       },
                     }}
                   >
-                    {stakeReceipts &&
-                      stakeReceipts.map((stake) => {
+                    {orderedReceipts &&
+                      orderedReceipts.map((stake) => {
                         const isAdding =
                           isAddingAssociated &&
                           isAddingAssociated === stake.mint.toString()
@@ -376,6 +382,25 @@ export default function Home() {
                                   marginTop: "1.6rem",
                                 }}
                               >
+                                {stake.objects?.length ? (
+                                  <Flex sx={{ gap: ".8rem" }}>
+                                    {stake.objects
+                                      ? stake.objects.map((object) => {
+                                          return (
+                                            <img
+                                              sx={{
+                                                maxWidth: "2.4rem",
+                                              }}
+                                              src={
+                                                object.metadata.externalMetadata
+                                                  .image
+                                              }
+                                            />
+                                          )
+                                        })
+                                      : null}
+                                  </Flex>
+                                ) : null}
                                 <Button
                                   sx={{
                                     alignItems: "center",
@@ -530,6 +555,40 @@ export default function Home() {
                                         }}
                                       >
                                         <Button type="submit">Add Thing</Button>
+                                      </Flex>
+                                      <Flex
+                                        sx={{
+                                          alignItems: "center",
+                                          gap: ".8rem",
+                                          margin: ".8rem 0",
+                                        }}
+                                      >
+                                        {feedbackStatus ? (
+                                          <>
+                                            {feedbackStatus.indexOf(
+                                              "Success"
+                                            ) === -1 ? (
+                                              <LoadingIcon size="1.6rem" />
+                                            ) : null}
+                                            {"  "}{" "}
+                                            <Text
+                                              variant="small"
+                                              sx={{
+                                                color:
+                                                  feedbackStatus.indexOf(
+                                                    "Success"
+                                                  ) !== -1
+                                                    ? "success"
+                                                    : "text",
+                                              }}
+                                            >
+                                              {feedbackStatus}
+                                            </Text>
+                                          </>
+                                        ) : (
+                                          ""
+                                        )}
+                                        &nbsp;
                                       </Flex>
                                     </form>
                                   ) : null}
