@@ -128,9 +128,41 @@ export default function Home() {
         <Text>Stake your Magpie now</Text>
 
         {farmerAccount === false ? (
-          <Button mt="3.2rem" onClick={initFarmer}>
-            Init account
-          </Button>
+          <>
+            <Button mt="3.2rem" onClick={initFarmer}>
+              Init account
+            </Button>
+            <Flex
+              sx={{
+                alignItems: "center",
+                gap: ".8rem",
+                margin: ".8rem 0",
+              }}
+            >
+              {feedbackStatus ? (
+                <>
+                  {feedbackStatus.indexOf("Success") === -1 ? (
+                    <LoadingIcon size="1.6rem" />
+                  ) : null}
+                  {"  "}{" "}
+                  <Text
+                    variant="small"
+                    sx={{
+                      color:
+                        feedbackStatus.indexOf("Success") !== -1
+                          ? "success"
+                          : "text",
+                    }}
+                  >
+                    {feedbackStatus}
+                  </Text>
+                </>
+              ) : (
+                ""
+              )}
+              &nbsp;
+            </Flex>
+          </>
         ) : null}
 
         {farmerAccount ? (
