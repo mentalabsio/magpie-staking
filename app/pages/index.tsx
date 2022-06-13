@@ -352,8 +352,6 @@ export default function Home() {
                           <Flex
                             key={stake.mint?.toString()}
                             sx={{
-                              alignItems: "center",
-                              gap: "1.6rem",
                               background: "background",
                               padding: "1.6rem",
                               borderRadius: ".4rem",
