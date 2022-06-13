@@ -54,13 +54,10 @@ describe("magpie-staking", () => {
   const stakingClient = StakingProgram(connection);
 
   // Farm creator.
-  const farmAuthority = Keypair.fromSecretKey(
-    new Uint8Array([
-      70, 235, 141, 166, 91, 119, 194, 105, 6, 32, 182, 53, 72, 22, 238, 54,
-      133, 171, 52, 173, 15, 181, 112, 76, 62, 107, 123, 247, 205, 27, 68, 99,
-      150, 192, 6, 126, 225, 43, 244, 25, 73, 179, 164, 247, 243, 52, 113, 205,
-      120, 179, 11, 151, 78, 25, 96, 24, 100, 38, 72, 101, 227, 176, 104, 207,
-    ])
+  const farmAuthority = anchor.web3.Keypair.fromSecretKey(
+    anchor.utils.bytes.bs58.decode(
+      "3Bz7XpZiZLHJC9gDU6RiVnAbduv3CJd6nqFbiSst4M6NPhZCouXxq9SgpBq8qr3M7F5pbXwNJRDSGWyssjzSPqY6"
+    )
   );
 
   // NFTs that will be staked.
@@ -77,7 +74,7 @@ describe("magpie-staking", () => {
   );
 
   const objectCreator = new PublicKey(
-    "62vz2oMLFf6k4DcX23tA6hR4ixDGUVxqk4gJf7iCGiEx"
+    "9mMwhmMVQaQYZk1nJhNt96zftvUKGLnvUk6u9ZhX6JJs"
   );
 
   const userWallet = anchor.web3.Keypair.fromSecretKey(
@@ -157,7 +154,7 @@ describe("magpie-staking", () => {
     expect(locks.every(lock => lock.farm === farm.toBase58())).to.be.true;
   });
 
-  it("should be able to fund a farm's rewards", async () => {
+  it.skip("should be able to fund a farm's rewards", async () => {
     const farm = findFarmAddress({
       authority: farmAuthority.publicKey,
       rewardMint: rewardMint,
@@ -177,78 +174,76 @@ describe("magpie-staking", () => {
     expect(farmAccount.reward.reserved.toNumber()).to.equal(0);
   });
 
-  it.skip("should be able to whitelist a creator address", async () => {
+  it("should be able to whitelist a creator address", async () => {
     const farm = findFarmAddress({
       authority: farmAuthority.publicKey,
       rewardMint,
     });
 
     // 5 tokens/day
-    // const objectRewardRate = {
-    //   intervalInSeconds: new BN(86_400),
-    //   tokenAmount: new BN(5e6),
-    // };
+    const objectRewardRate = {
+      intervalInSeconds: new BN(86_400),
+      tokenAmount: new BN(12e6),
+    };
 
-    // const whitelistObject = await stakingClient.createAddToWhitelistInstruction(
-    //   {
-    //     farm,
-    //     authority: farmAuthority.publicKey,
-    //     rewardRate: objectRewardRate,
-    //     creatorOrMint: objectCreator,
-    //     whitelistType: new WhitelistType.AssociatedObject(),
-    //   }
-    // );
-
-    const whitelistCreator =
-      await stakingClient.createAddToWhitelistInstruction({
-        creatorOrMint: creatorAddress,
-        authority: farmAuthority.publicKey,
+    const whitelistObject = await stakingClient.createAddToWhitelistInstruction(
+      {
         farm,
-        rewardRate: {
-          tokenAmount: new BN(24e6),
-          intervalInSeconds: new BN(86_400),
-        },
-        whitelistType: new WhitelistType.Creator(),
-      });
-
-    await send(
-      connection,
-      [whitelistCreator.ix /*, whitelistObject.ix */],
-      [farmAuthority]
+        authority: farmAuthority.publicKey,
+        rewardRate: objectRewardRate,
+        creatorOrMint: objectCreator,
+        whitelistType: new WhitelistType.AssociatedObject(),
+      }
     );
 
-    // const objectWhitelist = findWhitelistProofAddress({
-    //   farm,
-    //   creatorOrMint: objectCreator,
+    // const whitelistCreator =
+    //   await stakingClient.createAddToWhitelistInstruction({
+    //     creatorOrMint: creatorAddress,
+    //     authority: farmAuthority.publicKey,
+    //     farm,
+    //     rewardRate: {
+    //       tokenAmount: new BN(24e6),
+    //       intervalInSeconds: new BN(86_400),
+    //     },
+    //     whitelistType: new WhitelistType.Creator(),
     // });
 
-    // const objectWhitelistAccount = await WhitelistProof.fetch(
-    //   connection,
-    //   objectWhitelist
-    // );
+    const txid = await send(connection, [whitelistObject.ix], [farmAuthority]);
 
-    const creatorWhitelist = findWhitelistProofAddress({
+    await connection.confirmTransaction(txid);
+
+    const objectWhitelist = findWhitelistProofAddress({
       farm,
-      creatorOrMint: creatorAddress,
+      creatorOrMint: objectCreator,
     });
 
-    const creatorWhitelistAccount = await WhitelistProof.fetch(
+    const objectWhitelistAccount = await WhitelistProof.fetch(
       connection,
-      creatorWhitelist
+      objectWhitelist
     );
 
-    expect(creatorWhitelistAccount.farm.toString()).to.eql(farm.toString());
-    expect(creatorWhitelistAccount.whitelistedAddress.toString()).to.eql(
-      creatorAddress.toString()
-    );
-    expect(creatorWhitelistAccount.ty.kind).to.equal("Creator");
-    expect(creatorWhitelistAccount.rewardRate.toNumber()).to.equal(100);
+    // const creatorWhitelist = findWhitelistProofAddress({
+    //   farm,
+    //   creatorOrMint: creatorAddress,
+    // });
 
-    // expect(objectWhitelistAccount.ty.kind).to.equal("AssociatedObject");
-    // expect(objectWhitelistAccount.rewardRate.toNumber()).to.equal(57);
-    // expect(objectWhitelistAccount.whitelistedAddress.toString()).to.eql(
-    //   objectCreator.toString()
+    // const creatorWhitelistAccount = await WhitelistProof.fetch(
+    //   connection,
+    //   creatorWhitelist
     // );
+
+    // expect(creatorWhitelistAccount.farm.toString()).to.eql(farm.toString());
+    // expect(creatorWhitelistAccount.whitelistedAddress.toString()).to.eql(
+    //   creatorAddress.toString()
+    // );
+    // expect(creatorWhitelistAccount.ty.kind).to.equal("Creator");
+    // expect(creatorWhitelistAccount.rewardRate.toNumber()).to.equal(100);
+
+    expect(objectWhitelistAccount.ty.kind).to.equal("AssociatedObject");
+    expect(objectWhitelistAccount.rewardRate.toNumber()).to.equal(57);
+    expect(objectWhitelistAccount.whitelistedAddress.toString()).to.eql(
+      objectCreator.toString()
+    );
   });
 
   it.skip("should be able to whitelist a mint address", async () => {

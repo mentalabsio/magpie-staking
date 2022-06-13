@@ -68,7 +68,7 @@ export default function Home() {
         )
       }
 
-      return prev?.concat(item)
+      return prev.length < 4 ? prev?.concat(item) : prev
     })
   }
 
@@ -124,7 +124,7 @@ export default function Home() {
 
         {farmerAccount === false ? (
           <Button mt="3.2rem" onClick={initFarmer}>
-            Init farmer
+            Init account
           </Button>
         ) : null}
 

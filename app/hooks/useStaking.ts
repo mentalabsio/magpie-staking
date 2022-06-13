@@ -11,7 +11,7 @@ import { getNFTMetadata } from "utils/nfts"
 import { NFT } from "./useWalletNFTs"
 
 const farmAuthorityPubKey = new web3.PublicKey(
-  "B9Tz1QHnxPn3uavt4EGoo3Xf8kXJU4YkVanDeHadFtAA"
+  "7GMskbvh2ppNkHhYqYjCzXFYb8AYNfF4z3aYHZbkfeHx"
 )
 
 const rewardMint = new web3.PublicKey(
