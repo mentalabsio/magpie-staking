@@ -119,35 +119,39 @@ const useStaking = () => {
   }, [publicKey])
 
   const initFarmer = async () => {
-    const stakingClient = StakingProgram(connection)
+    try {
+      const stakingClient = StakingProgram(connection)
 
-    const farm = findFarmAddress({
-      authority: farmAuthorityPubKey,
-      rewardMint,
-    })
+      const farm = findFarmAddress({
+        authority: farmAuthorityPubKey,
+        rewardMint,
+      })
 
-    setFeedbackStatus("Initializing transaction...")
-    const { ix } = await stakingClient.createInitializeFarmerInstruction({
-      farm,
-      owner: publicKey,
-    })
+      setFeedbackStatus("Initializing transaction...")
+      const { ix } = await stakingClient.createInitializeFarmerInstruction({
+        farm,
+        owner: publicKey,
+      })
 
-    const tx = new Transaction()
+      const tx = new Transaction()
 
-    tx.add(ix)
+      tx.add(ix)
 
-    const latest = await connection.getLatestBlockhash()
-    tx.recentBlockhash = latest.blockhash
-    tx.feePayer = publicKey
+      const latest = await connection.getLatestBlockhash()
+      tx.recentBlockhash = latest.blockhash
+      tx.feePayer = publicKey
 
-    setFeedbackStatus("Awaiting approval...")
-    const txid = await sendTransaction(tx, connection)
+      setFeedbackStatus("Awaiting approval...")
+      const txid = await sendTransaction(tx, connection)
 
-    await connection.confirmTransaction(txid)
+      await connection.confirmTransaction(txid)
 
-    setFeedbackStatus("Success!")
+      setFeedbackStatus("Success!")
 
-    await fetchFarmer()
+      await fetchFarmer()
+    } catch (e) {
+      setFeedbackStatus("Something went wrong. " + e)
+    }
   }
 
   const stakeAll = async (mints: web3.PublicKey[]) => {
@@ -192,143 +196,156 @@ const useStaking = () => {
       setFeedbackStatus("Confirming...")
       await connection.confirmTransaction(txid)
 
-      console.log(txid)
+      setFeedbackStatus("Success!")
     } catch (e) {
-      console.log(e)
-      const parsed = fromTxError(e)
-
-      if (parsed) {
-        console.log(parsed)
-      }
+      setFeedbackStatus("Something went wrong. " + e)
     }
   }
 
   const unstake = async (mint: web3.PublicKey) => {
-    const farm = findFarmAddress({
-      authority: farmAuthorityPubKey,
-      rewardMint,
-    })
+    try {
+      const farm = findFarmAddress({
+        authority: farmAuthorityPubKey,
+        rewardMint,
+      })
 
-    const stakingClient = StakingProgram(connection)
+      const stakingClient = StakingProgram(connection)
 
-    setFeedbackStatus("Initializing...")
+      setFeedbackStatus("Initializing...")
 
-    const { ix } = await stakingClient.createUnstakeInstruction({
-      farm,
-      mint,
-      owner: publicKey,
-    })
+      const { ix } = await stakingClient.createUnstakeInstruction({
+        farm,
+        mint,
+        owner: publicKey,
+      })
 
-    const tx = new Transaction()
+      const tx = new Transaction()
 
-    tx.add(ix)
-    const latest = await connection.getLatestBlockhash()
-    tx.recentBlockhash = latest.blockhash
-    tx.feePayer = publicKey
+      tx.add(ix)
+      const latest = await connection.getLatestBlockhash()
+      tx.recentBlockhash = latest.blockhash
+      tx.feePayer = publicKey
 
-    setFeedbackStatus("Awaiting approval...")
+      setFeedbackStatus("Awaiting approval...")
 
-    const txid = await sendTransaction(tx, connection)
+      const txid = await sendTransaction(tx, connection)
 
-    setFeedbackStatus("Confirming...")
+      setFeedbackStatus("Confirming...")
 
-    await connection.confirmTransaction(txid)
+      await connection.confirmTransaction(txid)
+
+      setFeedbackStatus("Success!")
+    } catch (e) {
+      setFeedbackStatus("Something went wrong. " + e)
+    }
   }
 
   const claim = async () => {
-    const farm = findFarmAddress({
-      authority: farmAuthorityPubKey,
-      rewardMint,
-    })
-    const stakingClient = StakingProgram(connection)
+    try {
+      const farm = findFarmAddress({
+        authority: farmAuthorityPubKey,
+        rewardMint,
+      })
+      const stakingClient = StakingProgram(connection)
 
-    const { ix } = await stakingClient.createClaimRewardsInstruction({
-      farm,
-      authority: publicKey,
-    })
+      const { ix } = await stakingClient.createClaimRewardsInstruction({
+        farm,
+        authority: publicKey,
+      })
 
-    const tx = new Transaction()
+      const tx = new Transaction()
 
-    tx.add(ix)
-    const latest = await connection.getLatestBlockhash()
-    tx.recentBlockhash = latest.blockhash
-    tx.feePayer = publicKey
+      tx.add(ix)
+      const latest = await connection.getLatestBlockhash()
+      tx.recentBlockhash = latest.blockhash
+      tx.feePayer = publicKey
 
-    setFeedbackStatus("Awaiting approval...")
+      setFeedbackStatus("Awaiting approval...")
 
-    const txid = await sendTransaction(tx, connection)
+      const txid = await sendTransaction(tx, connection)
 
-    setFeedbackStatus("Confirming...")
+      setFeedbackStatus("Confirming...")
 
-    await connection.confirmTransaction(txid)
+      await connection.confirmTransaction(txid)
 
-    setFeedbackStatus("Success!")
+      setFeedbackStatus("Success!")
+    } catch (e) {
+      setFeedbackStatus("Something went wrong. " + e)
+    }
   }
 
   const addObject = async (mint: web3.PublicKey, object: web3.PublicKey) => {
-    const farm = findFarmAddress({
-      authority: farmAuthorityPubKey,
-      rewardMint,
-    })
+    try {
+      const farm = findFarmAddress({
+        authority: farmAuthorityPubKey,
+        rewardMint,
+      })
 
-    const stakingClient = StakingProgram(connection)
+      const stakingClient = StakingProgram(connection)
 
-    const { ix } = await stakingClient.createAddObjectInstruction({
-      farm,
-      mint,
-      object,
-      owner: publicKey,
-    })
+      const { ix } = await stakingClient.createAddObjectInstruction({
+        farm,
+        mint,
+        object,
+        owner: publicKey,
+      })
 
-    const tx = new Transaction()
+      const tx = new Transaction()
 
-    tx.add(ix)
-    const latest = await connection.getLatestBlockhash()
-    tx.recentBlockhash = latest.blockhash
-    tx.feePayer = publicKey
+      tx.add(ix)
+      const latest = await connection.getLatestBlockhash()
+      tx.recentBlockhash = latest.blockhash
+      tx.feePayer = publicKey
 
-    setFeedbackStatus("Awaiting approval...")
+      setFeedbackStatus("Awaiting approval...")
 
-    const txid = await sendTransaction(tx, connection)
+      const txid = await sendTransaction(tx, connection)
 
-    setFeedbackStatus("Confirming...")
+      setFeedbackStatus("Confirming...")
 
-    await connection.confirmTransaction(txid)
+      await connection.confirmTransaction(txid)
 
-    setFeedbackStatus("Success!")
+      setFeedbackStatus("Success!")
+    } catch (e) {
+      setFeedbackStatus("Something went wrong. " + e)
+    }
   }
 
   const removeObject = async (mint: web3.PublicKey, object: web3.PublicKey) => {
-    const farm = findFarmAddress({
-      authority: farmAuthorityPubKey,
-      rewardMint,
-    })
+    try {
+      const farm = findFarmAddress({
+        authority: farmAuthorityPubKey,
+        rewardMint,
+      })
 
-    const stakingClient = StakingProgram(connection)
+      const stakingClient = StakingProgram(connection)
 
-    const { ix } = await stakingClient.createRemoveObjectInstruction({
-      farm,
-      mint,
-      object,
-      owner: publicKey,
-    })
+      const { ix } = await stakingClient.createRemoveObjectInstruction({
+        farm,
+        mint,
+        object,
+        owner: publicKey,
+      })
 
-    const tx = new Transaction()
+      const tx = new Transaction()
 
-    tx.add(ix)
-    const latest = await connection.getLatestBlockhash()
-    tx.recentBlockhash = latest.blockhash
-    tx.feePayer = publicKey
+      tx.add(ix)
+      const latest = await connection.getLatestBlockhash()
+      tx.recentBlockhash = latest.blockhash
+      tx.feePayer = publicKey
 
-    setFeedbackStatus("Awaiting approval...")
+      setFeedbackStatus("Awaiting approval...")
 
-    const txid = await sendTransaction(tx, connection)
+      const txid = await sendTransaction(tx, connection)
 
-    setFeedbackStatus("Confirming...")
+      setFeedbackStatus("Confirming...")
 
-    await connection.confirmTransaction(txid)
+      await connection.confirmTransaction(txid)
 
-    setFeedbackStatus("Success!")
+      setFeedbackStatus("Success!")
+    } catch (e) {
+      setFeedbackStatus("Something went wrong. " + e)
+    }
   }
 
   return {

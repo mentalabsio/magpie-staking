@@ -49,7 +49,7 @@ export default function Home() {
 
     await addObject(new web3.PublicKey(mainMint), new web3.PublicKey(mint))
     await fetchAssociatedNFTs()
-    // await fetchProgress();
+    await fetchReceipts()
   }
 
   /**
@@ -255,7 +255,7 @@ export default function Home() {
                       )
                       await stakeAll(allMints)
                       await fetchNFTs()
-                      // await fetchProgress();
+                      await fetchReceipts()
                     }}
                     disabled={!selectedWalletItems.length}
                   >
@@ -264,25 +264,6 @@ export default function Home() {
                 </TabPanel>
 
                 <TabPanel>
-                  {/* <Button
-                onClick={async () => {
-                  await stakeAssociated()
-                  await fetchNFTs()
-                  await fetchProgress()
-                }}
-              >
-                stake associated
-              </Button>
-              <Button
-                onClick={async () => {
-                  await unstakeAssociated()
-                  await fetchNFTs()
-                  await fetchProgress()
-                }}
-              >
-                unstake associated
-              </Button> */}
-
                   <Flex
                     sx={{
                       flexDirection: "column",
@@ -332,7 +313,7 @@ export default function Home() {
                                   onClick={async () => {
                                     await unstake(stake.mint)
                                     await fetchNFTs()
-                                    // await fetchProgress();
+                                    await fetchReceipts()
                                   }}
                                 >
                                   Unstake
@@ -375,7 +356,7 @@ export default function Home() {
                                             stake.mint,
                                             object.key
                                           )
-                                          // await fetchProgress();
+                                          await fetchReceipts()
                                           await fetchAssociatedNFTs()
                                         }}
                                       >

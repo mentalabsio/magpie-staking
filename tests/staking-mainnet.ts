@@ -74,7 +74,7 @@ describe("magpie-staking", () => {
   );
 
   const objectCreator = new PublicKey(
-    "9mMwhmMVQaQYZk1nJhNt96zftvUKGLnvUk6u9ZhX6JJs"
+    "HPBqN8c1mTMEKELA5WVVinPMan1btWuDGQSt3jYk6SSg"
   );
 
   const userWallet = anchor.web3.Keypair.fromSecretKey(
@@ -163,14 +163,14 @@ describe("magpie-staking", () => {
     const { ix } = await stakingClient.createFundRewardInstruction({
       farm,
       authority: farmAuthority.publicKey,
-      amount: new BN(700e6),
+      amount: new BN(100_000e6),
     });
 
     await send(connection, [ix], [farmAuthority]);
 
     const farmAccount = await Farm.fetch(connection, farm);
 
-    expect(farmAccount.reward.available.toNumber()).to.equal(700e6);
+    expect(farmAccount.reward.available.toNumber()).to.equal(100_000e6);
     expect(farmAccount.reward.reserved.toNumber()).to.equal(0);
   });
 
@@ -183,7 +183,7 @@ describe("magpie-staking", () => {
     // 5 tokens/day
     const objectRewardRate = {
       intervalInSeconds: new BN(86_400),
-      tokenAmount: new BN(12e6),
+      tokenAmount: new BN(6e6),
     };
 
     const whitelistObject = await stakingClient.createAddToWhitelistInstruction(
