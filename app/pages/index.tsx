@@ -362,12 +362,12 @@ export default function Home() {
                                         gap: "1.6rem",
                                       }}
                                     >
-                                      {/* <CollectionItem
-                                    item={object}
-                                    sx={{
-                                      maxWidth: "8rem",
-                                    }}
-                                  /> */}
+                                      <CollectionItem
+                                        item={object.metadata}
+                                        sx={{
+                                          maxWidth: "8rem",
+                                        }}
+                                      />
                                       <Button
                                         onClick={async () => {
                                           /** Remove object */

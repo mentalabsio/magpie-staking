@@ -4,6 +4,7 @@ import { Transaction } from "@solana/web3.js"
 import { StakingProgram } from "lib"
 import { Farmer, StakeReceipt } from "lib/gen/accounts"
 import { fromTxError } from "lib/gen/errors"
+import { AssociatedObject } from "lib/gen/types"
 import { findFarmAddress, findFarmerAddress } from "lib/pda"
 import { findFarmLocks, findUserStakeReceipts } from "lib/utils"
 import { useCallback, useEffect, useState } from "react"
@@ -18,8 +19,18 @@ const rewardMint = new web3.PublicKey(
   "MM7s2bggZvq2DBFyBVKBBHb9DYAo3A2WGkP6L5cPzxC"
 )
 
-export type StakeReceiptWithMetadata = StakeReceipt & {
+export type StakeReceiptWithMetadata = {
   metadata: NFT
+  objects: (AssociatedObject & {
+    metadata: NFT
+  })[]
+  farmer: web3.PublicKey
+  mint: web3.PublicKey
+  lock: web3.PublicKey
+  startTs: BN
+  endTs: BN
+  amount: BN
+  rewardRate: BN
 }
 
 const useStaking = () => {
@@ -56,9 +67,22 @@ const useStaking = () => {
             connection
           )
 
-          const withMetadata = Object.assign(receipt, { metadata })
+          const objectsWithMetadatas = await Promise.all(
+            receipt.objects.map(async (object, index) => {
+              const metadata = await getNFTMetadata(
+                object.key.toString(),
+                connection
+              )
 
-          return withMetadata
+              const withMetadata = Object.assign(object, {
+                metadata,
+              })
+
+              return withMetadata
+            })
+          )
+
+          return { ...receipt, metadata, objects: objectsWithMetadatas }
         })
       )
 
