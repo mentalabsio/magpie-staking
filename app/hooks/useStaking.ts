@@ -150,7 +150,7 @@ const useStaking = () => {
 
       await fetchFarmer()
     } catch (e) {
-      setFeedbackStatus("Something went wrong. " + e)
+      setFeedbackStatus("Something went wrong. " + (e.message ? e.message : e))
     }
   }
 
@@ -198,7 +198,7 @@ const useStaking = () => {
 
       setFeedbackStatus("Success!")
     } catch (e) {
-      setFeedbackStatus("Something went wrong. " + e)
+      setFeedbackStatus("Something went wrong. " + (e.message ? e.message : e))
     }
   }
 
@@ -236,7 +236,7 @@ const useStaking = () => {
 
       setFeedbackStatus("Success!")
     } catch (e) {
-      setFeedbackStatus("Something went wrong. " + e)
+      setFeedbackStatus("Something went wrong. " + (e.message ? e.message : e))
     }
   }
 
@@ -270,7 +270,7 @@ const useStaking = () => {
 
       setFeedbackStatus("Success!")
     } catch (e) {
-      setFeedbackStatus("Something went wrong. " + e)
+      setFeedbackStatus("Something went wrong. " + (e.message ? e.message : e))
     }
   }
 
@@ -307,7 +307,7 @@ const useStaking = () => {
 
       setFeedbackStatus("Success!")
     } catch (e) {
-      setFeedbackStatus("Something went wrong. " + e)
+      setFeedbackStatus("Something went wrong. " + (e.message ? e.message : e))
     }
   }
 
@@ -344,7 +344,7 @@ const useStaking = () => {
 
       setFeedbackStatus("Success!")
     } catch (e) {
-      setFeedbackStatus("Something went wrong. " + e)
+      setFeedbackStatus("Something went wrong. " + (e.message ? e.message : e))
     }
   }
 
