@@ -1,21 +1,21 @@
 import { web3, BN } from "@project-serum/anchor"
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { Transaction } from "@solana/web3.js"
+import { useCallback, useEffect, useState } from "react"
+
 import { StakingProgram } from "lib"
 import { Farmer, StakeReceipt } from "lib/gen/accounts"
-import { fromTxError } from "lib/gen/errors"
 import { findFarmAddress, findFarmerAddress } from "lib/pda"
 import { findFarmLocks, findUserStakeReceipts } from "lib/utils"
-import { useCallback, useEffect, useState } from "react"
 import { getNFTMetadata } from "utils/nfts"
 import { NFT } from "./useWalletNFTs"
 
 const farmAuthorityPubKey = new web3.PublicKey(
-  "5XFNVmqjUdDG4yGJ6osU9KDzHAnwmoZ2FDQ1QdVKucXo"
+  "7JFd6StCPAqyV2Cj4WG7rSJY3uWHSToW7dLesCvCHTBd"
 )
 
 const rewardMint = new web3.PublicKey(
-  "7pJfxRnpR4vwdYkfX5e8QojBAysgTwcnJCBLKfQgWtz7"
+  "6B9C2UiSco1op2CaFnxiomsXSDQGZwP5bCC5fx5M4ERw"
 )
 
 export type StakeReceiptWithMetadata = StakeReceipt & {
@@ -34,6 +34,9 @@ const useStaking = () => {
     StakeReceiptWithMetadata[] | null
   >(null)
 
+  /**
+   * Fetch all stake receipts
+   */
   const fetchReceipts = useCallback(async () => {
     if (publicKey) {
       try {
@@ -77,6 +80,9 @@ const useStaking = () => {
     }
   }, [publicKey])
 
+  /**
+   * Fetch farmer account
+   */
   const fetchFarmer = useCallback(async () => {
     try {
       const farm = findFarmAddress({
@@ -192,7 +198,7 @@ const useStaking = () => {
     }
   }
 
-  const unstake = async (mint: web3.PublicKey) => {
+  const unstakeAll = async (mints: web3.PublicKey[]) => {
     try {
       const farm = findFarmAddress({
         authority: farmAuthorityPubKey,
@@ -203,15 +209,21 @@ const useStaking = () => {
 
       setFeedbackStatus("Initializing...")
 
-      const { ix } = await stakingClient.createUnstakeInstruction({
-        farm,
-        mint,
-        owner: publicKey,
-      })
+      const ixs = await Promise.all(
+        mints.map(async (mint) => {
+          const { ix } = await stakingClient.createUnstakeInstruction({
+            farm,
+            mint,
+            owner: publicKey,
+          })
+
+          return ix
+        })
+      )
 
       const tx = new Transaction()
 
-      tx.add(ix)
+      tx.add(...ixs)
       const latest = await connection.getLatestBlockhash()
       tx.recentBlockhash = latest.blockhash
       tx.feePayer = publicKey
@@ -269,8 +281,8 @@ const useStaking = () => {
     claim,
     initFarmer,
     stakeAll,
+    unstakeAll,
     stakeReceipts,
-    unstake,
     fetchReceipts,
   }
 }

@@ -14,6 +14,7 @@ import { LoadingIcon } from "@/components/icons/LoadingIcon"
 export default function Home() {
   const { walletNFTs, fetchNFTs } = useWalletNFTs()
   const [selectedWalletItems, setSelectedWalletItems] = useState<NFT[]>([])
+  const [selectedVaultItems, setSelectedVaultItems] = useState<NFT[]>([])
 
   const {
     farmerAccount,
@@ -22,7 +23,7 @@ export default function Home() {
     claim,
     stakeReceipts,
     feedbackStatus,
-    unstake,
+    unstakeAll,
     fetchReceipts,
   } = useStaking()
 
@@ -31,6 +32,23 @@ export default function Home() {
    */
   const handleWalletItemClick = (item: NFT) => {
     setSelectedWalletItems((prev) => {
+      const exists = prev.find(
+        (NFT) => NFT.onchainMetadata.mint === item.onchainMetadata.mint
+      )
+
+      /** Remove if exists */
+      if (exists) {
+        return prev.filter(
+          (NFT) => NFT.onchainMetadata.mint !== item.onchainMetadata.mint
+        )
+      }
+
+      return prev.length < 4 ? prev?.concat(item) : prev
+    })
+  }
+
+  const handleVaultItemClick = (item: NFT) => {
+    setSelectedVaultItems((prev) => {
       const exists = prev.find(
         (NFT) => NFT.onchainMetadata.mint === item.onchainMetadata.mint
       )
@@ -241,6 +259,30 @@ export default function Home() {
                 </TabList>
 
                 <TabPanel>
+                  <Flex
+                    sx={{
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      margin: "1.6rem 0",
+                      paddingBottom: ".8rem",
+                    }}
+                  >
+                    <Heading variant="heading2">Your wallet NFTs</Heading>
+                    <Button
+                      onClick={async (e) => {
+                        const allMints = selectedWalletItems.map(
+                          (item) => item.mint
+                        )
+                        await stakeAll(allMints)
+                        await fetchNFTs()
+                        await fetchReceipts()
+                        setSelectedWalletItems([])
+                      }}
+                      disabled={!selectedWalletItems.length}
+                    >
+                      Stake selected
+                    </Button>
+                  </Flex>
                   <NFTGallery NFTs={walletNFTs}>
                     <>
                       {walletNFTs?.map((item) => {
@@ -277,38 +319,52 @@ export default function Home() {
                       })}
                     </>
                   </NFTGallery>
-                  <Button
-                    sx={{
-                      margin: "3.2rem auto",
-                    }}
-                    onClick={async (e) => {
-                      const allMints = selectedWalletItems.map(
-                        (item) => item.mint
-                      )
-                      await stakeAll(allMints)
-                      await fetchNFTs()
-                      await fetchReceipts()
-                    }}
-                    disabled={!selectedWalletItems.length}
-                  >
-                    Stake selected
-                  </Button>
                 </TabPanel>
 
                 <TabPanel>
                   <Flex
                     sx={{
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      margin: "1.6rem 0",
+                      paddingBottom: ".8rem",
+                    }}
+                  >
+                    <Heading variant="heading2">Your vault NFTs</Heading>
+                    <Button
+                      onClick={async (e) => {
+                        const allMints = selectedVaultItems.map(
+                          (item) => item.mint
+                        )
+                        await unstakeAll(allMints)
+                        await fetchNFTs()
+                        await fetchReceipts()
+                        setSelectedVaultItems([])
+                      }}
+                      disabled={!selectedVaultItems.length}
+                    >
+                      Unstake selected
+                    </Button>
+                  </Flex>
+                  <Flex
+                    sx={{
                       flexDirection: "column",
-                      gap: "3.2rem",
+                      gap: "1.6rem",
 
                       "@media (min-width: 768px)": {
                         display: "grid",
-                        gridTemplateColumns: "1fr 1fr 1fr",
+                        gridTemplateColumns: "1fr 1fr 1fr 1fr",
                       },
                     }}
                   >
                     {orderedReceipts &&
                       orderedReceipts.map((stake) => {
+                        const isSelected = selectedVaultItems.find(
+                          (NFT) =>
+                            NFT.onchainMetadata.mint ===
+                            stake.metadata.onchainMetadata.mint
+                        )
+
                         return (
                           <Flex
                             key={stake.mint?.toString()}
@@ -332,8 +388,20 @@ export default function Home() {
                                 gap: "1.6rem",
                               }}
                             >
-                              <CollectionItem item={stake.metadata} />
-                              <Flex
+                              <CollectionItem
+                                sx={{
+                                  maxWidth: "16rem",
+                                  "> img": {
+                                    border: "3px solid transparent",
+                                    borderColor: isSelected
+                                      ? "primary"
+                                      : "transparent",
+                                  },
+                                }}
+                                onClick={handleVaultItemClick}
+                                item={stake.metadata}
+                              />
+                              {/* <Flex
                                 sx={{
                                   gap: "1.6rem",
                                   alignItems: "center",
@@ -341,17 +409,8 @@ export default function Home() {
                                   marginTop: "1.6rem",
                                 }}
                               >
-                                <Button
-                                  variant="resetted"
-                                  onClick={async () => {
-                                    await unstake(stake.mint)
-                                    await fetchNFTs()
-                                    await fetchReceipts()
-                                  }}
-                                >
-                                  Unstake
-                                </Button>
-                              </Flex>
+                                <Button variant="resetted">Unstake</Button>
+                              </Flex> */}
                             </Flex>
                           </Flex>
                         )
