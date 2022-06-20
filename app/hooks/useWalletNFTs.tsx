@@ -34,21 +34,25 @@ const useWalletNFTs = (creators: string[] = []) => {
   const [walletNFTs, setWalletNFTs] = useState<Array<NFT> | null>(null)
 
   const fetchNFTs = useCallback(async () => {
-    console.log("[useWalletNFTs] Fetching NFTs...")
-    const NFTs = await getNFTsByOwner(publicKey, connection)
+    try {
+      console.log("[useWalletNFTs] Fetching NFTs...")
+      const NFTs = await getNFTsByOwner(publicKey, connection)
 
-    const filtered =
-      creators && creators?.length
-        ? NFTs.filter((NFT) => {
-            const obj = NFT.onchainMetadata?.data?.creators?.find((value) => {
-              return creators.indexOf(value.address) !== -1
+      const filtered =
+        creators && creators?.length
+          ? NFTs.filter((NFT) => {
+              const obj = NFT.onchainMetadata?.data?.creators?.find((value) => {
+                return creators.indexOf(value.address) !== -1
+              })
+
+              return obj
             })
+          : NFTs
 
-            return obj
-          })
-        : NFTs
-
-    setWalletNFTs(filtered)
+      setWalletNFTs(filtered)
+    } catch (e) {
+      console.log(e)
+    }
   }, [connection, publicKey])
 
   useEffect(() => {

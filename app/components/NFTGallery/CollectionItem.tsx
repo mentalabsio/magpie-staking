@@ -119,12 +119,12 @@ const CollectionItem = (props: Props) => {
         }}
       >
         <a
-          href={onchainMetadata.data.uri}
+          href={`https://solscan.io/token/${onchainMetadata.mint}`}
           rel="noopener noreferrer"
           target="_blank"
           tabIndex={1}
         >
-          View raw JSON
+          View on Solscan
         </a>
         <a
           href={externalMetadata.image}
