@@ -283,6 +283,7 @@ export default function Home() {
                       Stake selected
                     </Button>
                   </Flex>
+
                   <NFTGallery NFTs={walletNFTs}>
                     <>
                       {walletNFTs?.map((item) => {
@@ -367,41 +368,26 @@ export default function Home() {
 
                         return (
                           <Flex
-                            key={stake.mint?.toString()}
                             sx={{
-                              background: "background",
-                              padding: "1.6rem",
-                              borderRadius: ".4rem",
                               flexDirection: "column",
-                              position: "relative",
-                              justifyContent: "center",
-
-                              "@media (min-width:768px)": {
-                                flexDirection: "row",
-                              },
+                              alignItems: "center",
+                              gap: "1.6rem",
                             }}
                           >
-                            <Flex
+                            <CollectionItem
                               sx={{
-                                flexDirection: "column",
-                                alignItems: "center",
-                                gap: "1.6rem",
+                                maxWidth: "16rem",
+                                "> img": {
+                                  border: "3px solid transparent",
+                                  borderColor: isSelected
+                                    ? "primary"
+                                    : "transparent",
+                                },
                               }}
-                            >
-                              <CollectionItem
-                                sx={{
-                                  maxWidth: "16rem",
-                                  "> img": {
-                                    border: "3px solid transparent",
-                                    borderColor: isSelected
-                                      ? "primary"
-                                      : "transparent",
-                                  },
-                                }}
-                                onClick={handleVaultItemClick}
-                                item={stake.metadata}
-                              />
-                              {/* <Flex
+                              onClick={handleVaultItemClick}
+                              item={stake.metadata}
+                            />
+                            {/* <Flex
                                 sx={{
                                   gap: "1.6rem",
                                   alignItems: "center",
@@ -411,7 +397,6 @@ export default function Home() {
                               >
                                 <Button variant="resetted">Unstake</Button>
                               </Flex> */}
-                            </Flex>
                           </Flex>
                         )
                       })}
