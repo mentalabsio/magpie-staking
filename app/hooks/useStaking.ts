@@ -45,6 +45,9 @@ const useStaking = () => {
     StakeReceiptWithMetadata[] | null
   >(null)
 
+  /**
+   * Fetch all stake receipts
+   */
   const fetchReceipts = useCallback(async () => {
     if (publicKey) {
       const farm = findFarmAddress({
@@ -91,6 +94,9 @@ const useStaking = () => {
     }
   }, [publicKey])
 
+  /**
+   * Fetch farmer account
+   */
   const fetchFarmer = useCallback(async () => {
     const farm = findFarmAddress({
       authority: farmAuthorityPubKey,
@@ -355,8 +361,8 @@ const useStaking = () => {
     initFarmer,
     fetchFarmer,
     stakeAll,
-    stakeReceipts,
     unstake,
+    stakeReceipts,
     fetchReceipts,
     addObject,
     removeObject,

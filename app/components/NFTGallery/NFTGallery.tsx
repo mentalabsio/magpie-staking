@@ -20,27 +20,20 @@ export function NFTGallery({ NFTs, children }: NFTCollectionProps) {
     <>
       {NFTs ? (
         NFTs.length ? (
-          <Flex
+          <div
             sx={{
-              flexDirection: "column",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "1.6rem",
               alignItems: "center",
+
+              "@media (min-width: 768px)": {
+                gridTemplateColumns: "1fr 1fr 1fr 1fr",
+              },
             }}
           >
-            <div
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "1.6rem",
-                alignItems: "center",
-
-                "@media (min-width: 768px)": {
-                  gridTemplateColumns: "1fr 1fr 1fr 1fr",
-                },
-              }}
-            >
-              {children}
-            </div>
-          </Flex>
+            {children}
+          </div>
         ) : (
           /** NFTs fetched but array is empty, means current wallet has no NFT. */
           <Flex

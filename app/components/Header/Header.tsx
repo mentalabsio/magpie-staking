@@ -1,13 +1,13 @@
 /** @jsxImportSource theme-ui */
-import Link from "next/link";
-import { Button, Container, Flex, Text } from "@theme-ui/components";
+import Link from "next/link"
+import { Button, Container, Flex, Text } from "@theme-ui/components"
 
-import WalletManager from "@/components/WalletManager/WalletManager";
-import { useState } from "react";
-import { CloseIcon, MenuIcon } from "../icons";
+import WalletManager from "@/components/WalletManager/WalletManager"
+import { useState } from "react"
+import { CloseIcon, MenuIcon } from "../icons"
 
 const Header = () => {
-  const [isMobileMenuActive, setIsMobileMenuActive] = useState(false);
+  const [isMobileMenuActive, setIsMobileMenuActive] = useState(false)
 
   return (
     <Flex
@@ -15,7 +15,7 @@ const Header = () => {
         position: "sticky",
         top: 0,
         zIndex: 9,
-        background: theme => "hsla(0,0%,100%,.76)",
+        background: (theme) => "hsla(0,0%,100%,.76)",
         borderBottom: "1px solid",
         backdropFilter: "blur(5px)",
         borderColor: "background2",
@@ -133,7 +133,7 @@ const Header = () => {
         </Flex>
       </Container>
     </Flex>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header
