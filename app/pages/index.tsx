@@ -656,26 +656,26 @@ export default function Home() {
                                 </Flex>
                               </Flex>
                             </div>
-                            <div
-                              onClick={() => setIsModalOpen(false)}
-                              sx={{
-                                "::before": {
-                                  content: "''",
-                                  position: "fixed",
-                                  backgroundColor: "background",
-                                  visibility: isOpen ? "visible" : "hidden",
-                                  opacity: isOpen ? 0.5 : 0,
-                                  zIndex: 998,
-                                  top: 0,
-                                  bottom: 0,
-                                  left: 0,
-                                  right: 0,
-                                },
-                              }}
-                            ></div>
                           </Flex>
                         )
                       })}
+                    <div
+                      onClick={() => setIsModalOpen(false)}
+                      sx={{
+                        "::before": {
+                          content: "''",
+                          position: "fixed",
+                          backgroundColor: "background",
+                          visibility: isModalOpen ? "visible" : "hidden",
+                          opacity: isModalOpen ? 0.5 : 0,
+                          zIndex: 998,
+                          top: 0,
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                        },
+                      }}
+                    ></div>
                   </Flex>
                 </TabPanel>
               </Tabs>
