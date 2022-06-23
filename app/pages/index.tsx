@@ -2,7 +2,7 @@
 import Head from "next/head"
 
 import { Button, Flex, Heading, Text } from "@theme-ui/components"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 import Header from "@/components/Header/Header"
 import { NFTGallery } from "@/components/NFTGallery/NFTGallery"
@@ -64,11 +64,14 @@ export default function Home() {
     })
   }
 
-  const orderedReceipts =
-    stakeReceipts &&
-    stakeReceipts.sort((a, b) =>
-      a.startTs.toNumber() < b.startTs.toNumber() ? 1 : -1
+  const orderedReceipts = useMemo(() => {
+    return (
+      stakeReceipts &&
+      stakeReceipts.sort((a, b) =>
+        a.startTs.toNumber() < b.startTs.toNumber() ? 1 : -1
+      )
     )
+  }, [stakeReceipts])
 
   return (
     <>
