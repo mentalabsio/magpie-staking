@@ -208,7 +208,7 @@ const useStaking = () => {
     }
   }
 
-  const unstake = async (mint: web3.PublicKey) => {
+  const unstakeAll = async (mints: web3.PublicKey[]) => {
     try {
       const farm = findFarmAddress({
         authority: farmAuthorityPubKey,
@@ -219,15 +219,21 @@ const useStaking = () => {
 
       setFeedbackStatus("Initializing...")
 
-      const { ix } = await stakingClient.createUnstakeInstruction({
-        farm,
-        mint,
-        owner: publicKey,
-      })
+      const ixs = await Promise.all(
+        mints.map(async (mint) => {
+          const { ix } = await stakingClient.createUnstakeInstruction({
+            farm,
+            mint,
+            owner: publicKey,
+          })
+
+          return ix
+        })
+      )
 
       const tx = new Transaction()
 
-      tx.add(ix)
+      tx.add(...ixs)
       const latest = await connection.getLatestBlockhash()
       tx.recentBlockhash = latest.blockhash
       tx.feePayer = publicKey
@@ -239,8 +245,6 @@ const useStaking = () => {
       setFeedbackStatus("Confirming...")
 
       await connection.confirmTransaction(txid)
-
-      setFeedbackStatus("Success!")
     } catch (e) {
       setFeedbackStatus("Something went wrong. " + (e.message ? e.message : e))
     }
@@ -361,7 +365,7 @@ const useStaking = () => {
     initFarmer,
     fetchFarmer,
     stakeAll,
-    unstake,
+    unstakeAll,
     stakeReceipts,
     fetchReceipts,
     addObject,
