@@ -694,43 +694,7 @@ export default function Home() {
         ) : null}
       </main>
 
-      <footer
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          margin: "4rem 0",
-          // marginTop: "32rem",
-          position: "relative",
-        }}
-      >
-        <a
-          href="https://twitter.com/magicshards"
-          target="_blank"
-          rel="noopener noreferrer"
-          sx={{
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <Text
-            variant="small"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <img
-              sx={{
-                height: "32px",
-              }}
-              src="/magicshards320px.gif"
-              alt="Magic Shards"
-              height={32}
-            />
-          </Text>
-        </a>
-      </footer>
+     
     </>
   )
 }
