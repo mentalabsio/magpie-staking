@@ -143,7 +143,7 @@ const useStaking = () => {
 
       tx.add(ix)
 
-      const latest = await connection.getLatestBlockhash()
+      const latest = await connection.getLatestBlockhash("finalized")
       tx.recentBlockhash = latest.blockhash
       tx.feePayer = publicKey
 
@@ -192,7 +192,7 @@ const useStaking = () => {
 
       tx.add(...additionals, ...ixs)
 
-      const latest = await connection.getLatestBlockhash()
+      const latest = await connection.getLatestBlockhash("finalized")
       tx.recentBlockhash = latest.blockhash
       tx.feePayer = publicKey
 
@@ -234,7 +234,7 @@ const useStaking = () => {
       const tx = new Transaction()
 
       tx.add(...ixs)
-      const latest = await connection.getLatestBlockhash()
+      const latest = await connection.getLatestBlockhash("finalized")
       tx.recentBlockhash = latest.blockhash
       tx.feePayer = publicKey
 
@@ -266,7 +266,7 @@ const useStaking = () => {
       const tx = new Transaction()
 
       tx.add(ix)
-      const latest = await connection.getLatestBlockhash()
+      const latest = await connection.getLatestBlockhash("finalized")
       tx.recentBlockhash = latest.blockhash
       tx.feePayer = publicKey
 
@@ -303,7 +303,7 @@ const useStaking = () => {
       const tx = new Transaction()
 
       tx.add(ix)
-      const latest = await connection.getLatestBlockhash()
+      const latest = await connection.getLatestBlockhash("finalized")
       tx.recentBlockhash = latest.blockhash
       tx.feePayer = publicKey
 
@@ -340,7 +340,7 @@ const useStaking = () => {
       const tx = new Transaction()
 
       tx.add(ix)
-      const latest = await connection.getLatestBlockhash()
+      const latest = await connection.getLatestBlockhash("finalized")
       tx.recentBlockhash = latest.blockhash
       tx.feePayer = publicKey
 
